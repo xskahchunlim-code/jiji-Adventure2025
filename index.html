@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v17.0 (Online Ranking)</title>
+    <title>Jiji's Adventure v24.0 (Final Stable)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
@@ -109,7 +109,7 @@
             100% { transform: translateY(0) rotate(0deg); } 
         }
 
-        /* === Tutorial & Settings === */
+        /* === Tutorial & Ranking === */
         .story-text {
             background: #eef2f7; padding: 15px; border-radius: 10px;
             font-size: 15px; color: #555; text-align: left; line-height: 1.5;
@@ -123,19 +123,6 @@
         .tutorial-text { font-size: 15px; color: #555; }
         .tutorial-text b { color: #6c5ce7; font-size: 16px; display: block; margin-bottom: 2px; }
 
-        .bulk-area {
-            background: #f0f3ff; border: 2px dashed #6c5ce7; border-radius: 15px;
-            padding: 20px; margin-bottom: 20px; text-align: center;
-        }
-        .bulk-log {
-            font-size: 12px; color: #444; margin-top: 10px; text-align: left;
-            max-height: 60px; overflow-y: auto; background: white; padding: 5px;
-            border-radius: 5px; display: none;
-        }
-
-        .upload-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
-        .upload-row span { font-size: 14px; color: #333; }
-        
         .close-btn { background: #aaa; color: white; border: none; padding: 10px 30px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-size: 18px;}
         .close-btn:hover { background: #888; }
 
@@ -150,7 +137,7 @@
             text-shadow: 4px 4px 10px rgba(0,0,0,0.5); display: none; z-index: 20;
         }
 
-        /* === Ranking Styles (Added for v17) === */
+        /* === Ranking Styles === */
         .ranking-row {
             display: flex; justify-content: space-between; padding: 10px;
             border-bottom: 1px solid #eee; font-size: 18px; color: #333;
@@ -171,12 +158,11 @@
         <div id="home-title">Jiji's Adventure</div>
         <div id="home-subtitle">~ Work Hard, Play Hard ~</div>
         
-        <img id="home-idle-jiji" src="" alt="Jiji Idle" onerror="this.style.display='none'">
-        <img id="home-run-jiji" src="" alt="Jiji Run" onerror="this.style.display='none'">
+        <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
+        <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
 
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
-        <button class="menu-btn" onclick="openSettings()">Settings</button>
         <button class="menu-btn" onclick="showRanking()">Ranking</button>
         <button class="menu-btn" onclick="exitGame()">Exit</button>
     </div>
@@ -198,7 +184,6 @@
     <div id="pause-overlay" class="modal-overlay">
         <div style="color:white; font-size:60px; font-weight:900; margin-bottom: 20px;">PAUSED</div>
         <button class="menu-btn" onclick="togglePause()">Resume</button>
-        <button class="menu-btn" onclick="openSettings()">Settings</button>
         <button class="menu-btn" onclick="location.reload()" style="background:#ff7675; color:white;">Back to Home</button>
     </div>
 
@@ -217,27 +202,6 @@
             </div>
             <div class="tutorial-grid" id="tutorial-content"></div>
             <button class="close-btn" onclick="closeModal('tutorial-modal')">Let's Go!</button>
-        </div>
-    </div>
-
-    <div id="settings-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h2 style="margin-top: 0;">🛠️ Settings & Assets</h2>
-            
-            <div class="bulk-area">
-                <h3 style="margin:0 0 5px 0; color:#6c5ce7;">📂 One-Click Upload</h3>
-                <p style="font-size:13px; color:#555; margin-bottom:15px;">Select ALL images & audio files. System matches them by name.</p>
-                <input type="file" id="bulk-inp" multiple accept="image/*,audio/*" style="display:none" onchange="handleBulkUpload(this)">
-                <button class="menu-btn" style="width:100%; font-size:16px; padding:10px;" onclick="document.getElementById('bulk-inp').click()">Select Files</button>
-                <div id="bulk-status" class="bulk-log"></div>
-            </div>
-
-            <div style="text-align:left; max-height: 200px; overflow-y:auto; border-top:1px solid #eee; padding-top:10px;">
-                <div style="font-size:12px; color:#999; text-align:center;">--- File Status ---</div>
-                <div id="full-asset-list"></div>
-            </div>
-            
-            <button class="close-btn" onclick="closeSettings()">Save & Close</button>
         </div>
     </div>
 
@@ -274,22 +238,21 @@
         </div>
     </div>
 
-    <audio id="bgm" loop><source src="bgm.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-jump"><source src="jump.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-coin"><source src="coin.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-hit"><source src="hit.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-win"><source src="win.mp3" type="audio/mpeg"></audio>
+    <audio id="bgm" src="bgm.mp3" loop></audio>
+    <audio id="sfx-jump" src="jump.mp3"></audio>
+    <audio id="sfx-coin" src="coin.mp3"></audio>
+    <audio id="sfx-hit" src="hit.mp3"></audio>
+    <audio id="sfx-win" src="win.mp3"></audio>
 
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
 
     <script type="module">
         import * as THREE from 'three';
-        // Import Firebase SDK (Added for Ranking)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // =========================================================
-        // ✅ 你的 Firebase Config 已填入！
+        // ✅ FIREBASE CONFIG
         // =========================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBd2xW-b9WNy8JmlSNdjsVEswzZHkr3-Hs",
@@ -313,110 +276,44 @@
             }
         } catch(e) { console.error("Firebase Config Error:", e); }
 
-        // === 1. ASSET MANAGEMENT ===
-        function mkTex(t, color='white', txt='?') {
-            const c=document.createElement('canvas');c.width=256;c.height=256;const x=c.getContext('2d');x.clearRect(0,0,256,256);
-            x.fillStyle=color; 
-            if(t=='jiji') { x.beginPath();x.arc(128,128,100,0,7);x.fill();x.fillStyle='black';x.fillText("JIJI",90,130); }
-            else if(t.includes('run')) { x.fillStyle='orange'; x.beginPath();x.arc(128,128,100,0,7);x.fill();x.fillStyle='white';x.fillText("RUN",80,130); }
-            else { x.fillRect(28,28,200,200);x.fillStyle='black';x.font='50px Arial';x.fillText(txt,60,140); }
-            return c.toDataURL();
-        }
-
-        const IMG_KEYS = ['jiji', 'jiji_run_1','jiji_run_2','jiji_run_3','tea','bug','iso','quiz','computer','fish'];
-        const AUD_KEYS = ['bgm','jump','coin','hit','win'];
-
-        function getAssetSrc(key) {
-            return localStorage.getItem('asset_' + key) || (key.includes('run')||key==='jiji' ? key+'.png' : mkTex(key));
-        }
-
-        const texCache = {};
-        function loadMat(key) {
-            let src = getAssetSrc(key);
-            // Default Placeholders logic
-            if(!localStorage.getItem('asset_'+key) && !key.includes('jiji') && !key.includes('run')) {
-                if(key=='bug') src=mkTex('b','gold','$');
-                if(key=='computer') src=mkTex('c','#ff5555','PC');
-                if(key=='fish') src=mkTex('f','#00bfff','Fish');
-                if(key=='tea') src=mkTex('t','pink','Tea');
-                if(key=='quiz') src=mkTex('q','#6c5ce7','?');
-                if(key=='iso') src=mkTex('i','cyan','ISO');
-            }
-            const img = new Image(); img.src = src;
-            const tex = new THREE.Texture(img); 
-            img.onload = () => tex.needsUpdate = true;
+        // === 1. ASSET MANAGEMENT (Direct Loading) ===
+        // We now directly try to load 'name.png'. 
+        // If it fails, Three.js will just not show it (invisible), or we could add error handling.
+        // For simplicity and to fix your "missing icons", we rely on the files being present.
+        
+        function loadMat(name) {
+            const tex = new THREE.TextureLoader().load(
+                name + '.png', 
+                (t) => { t.colorSpace = THREE.SRGBColorSpace; }, // Success
+                undefined,
+                (err) => { console.warn("Failed to load image:", name + '.png'); } // Error
+            );
             return new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
         }
 
-        const mats = {};
-        IMG_KEYS.forEach(k => mats[k] = loadMat(k));
+        const mats = {
+            jiji: loadMat('jiji'), 
+            jiji_run_1: loadMat('jiji_run_1'), 
+            jiji_run_2: loadMat('jiji_run_2'), 
+            jiji_run_3: loadMat('jiji_run_3'),
+            bug: loadMat('bug'), 
+            computer: loadMat('computer'), 
+            fish: loadMat('fish'), 
+            tea: loadMat('tea'), 
+            iso: loadMat('iso'), 
+            quiz: loadMat('quiz')
+        };
 
         function playSound(id) {
             const el = document.getElementById(id);
-            const custom = localStorage.getItem('audio_' + id.replace('sfx-','').replace('bgm','bgm'));
-            if(custom) el.src = custom;
-            el.currentTime = 0;
-            // Force volume for bgm
+            if(!el) return;
             if(id === 'bgm') el.volume = 0.5;
-            el.play().catch(e=>{ console.log("Audio waiting for interaction"); });
+            el.currentTime = 0;
+            // Catch error in case user hasn't interacted yet
+            el.play().catch(e => console.log("Sound blocked (click 'Start' first):", e));
         }
 
-        // === 2. BULK UPLOAD LOGIC ===
-        window.handleBulkUpload = (input) => {
-            const files = Array.from(input.files);
-            const log = document.getElementById('bulk-status');
-            log.style.display = 'block';
-            log.innerHTML = "Processing...";
-            
-            let loaded = 0;
-
-            files.forEach(file => {
-                const name = file.name.toLowerCase();
-                let key = null;
-                let isAudio = false;
-
-                if(name.includes('run_1')) key = 'jiji_run_1';
-                else if(name.includes('run_2')) key = 'jiji_run_2';
-                else if(name.includes('run_3')) key = 'jiji_run_3';
-                else if(name.includes('jiji') && !name.includes('run')) key = 'jiji'; 
-                else if(name.includes('tea')) key = 'tea';
-                else if(name.includes('bug') || name.includes('coin')) key = 'bug';
-                else if(name.includes('pc') || name.includes('computer')) key = 'computer';
-                else if(name.includes('fish')) key = 'fish';
-                else if(name.includes('iso')) key = 'iso';
-                else if(name.includes('quiz') || name.includes('question')) key = 'quiz';
-
-                if(name.includes('bgm')) { key = 'bgm'; isAudio = true; }
-                else if(name.includes('jump')) { key = 'jump'; isAudio = true; }
-                else if(name.includes('coin')) { key = 'coin'; isAudio = true; }
-                else if(name.includes('hit')) { key = 'hit'; isAudio = true; }
-                else if(name.includes('win')) { key = 'win'; isAudio = true; }
-
-                if(key) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const prefix = isAudio ? 'audio_' : 'asset_';
-                        localStorage.setItem(prefix + key, e.target.result);
-                        loaded++;
-                        log.innerHTML = `✅ Loaded: ${key} <br>` + log.innerHTML;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        };
-
-        const listDiv = document.getElementById('full-asset-list');
-        [...IMG_KEYS, ...AUD_KEYS].forEach(k => {
-            const div = document.createElement('div'); div.className = 'upload-row';
-            div.innerHTML = `<span>${k}</span> <span style="font-size:10px; color:#aaa;">(Match name: ${k})</span>`;
-            listDiv.appendChild(div);
-        });
-
-        // Set Home Images
-        document.getElementById('home-idle-jiji').src = getAssetSrc('jiji'); 
-        document.getElementById('home-run-jiji').src = getAssetSrc('jiji_run_1'); 
-
-        // === 3. RANKING LOGIC (ADDED) ===
+        // === 2. RANKING LOGIC ===
         window.submitScore = async () => {
             const name = document.getElementById('player-name-inp').value.trim();
             if(!name) { alert("Please enter a name!"); return; }
@@ -433,7 +330,7 @@
                     date: new Date().toISOString()
                 });
                 alert("Score Submitted!");
-                showRanking(); // Show ranking after submit
+                showRanking();
             } catch (e) {
                 alert("Error submitting: " + e.message);
             }
@@ -470,30 +367,11 @@
             }
         };
 
-        // === 4. MENU NAVIGATION LOGIC ===
+        // === 3. MENU NAVIGATION LOGIC ===
         window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
         
-        // Settings Logic
-        window.openSettings = () => {
-            document.getElementById('home-screen').style.display = 'none';
-            document.getElementById('pause-overlay').style.display = 'none';
-            document.getElementById('settings-modal').style.display = 'flex';
-            if(gameState === 'PLAYING') { isPaused = true; gameState = 'PAUSED'; CLOCK.stop(); }
-        };
-
-        window.closeSettings = () => {
-            document.getElementById('settings-modal').style.display = 'none';
-            if (gameState === 'HOME') {
-                document.getElementById('home-screen').style.display = 'flex';
-                // Refresh images
-                document.getElementById('home-idle-jiji').src = getAssetSrc('jiji'); 
-                document.getElementById('home-run-jiji').src = getAssetSrc('jiji_run_1'); 
-            } else {
-                document.getElementById('pause-overlay').style.display = 'flex';
-            }
-        };
-
         window.startGameLogic = () => {
+            // This click event is CRITICAL for unlocking audio in browsers
             playSound('bgm'); 
             initGame();
         };
@@ -501,7 +379,7 @@
         window.showTutorial = () => {
             playSound('sfx-jump'); 
             const list = document.getElementById('tutorial-content');
-            const iconHTML = (k) => `<img src="${getAssetSrc(k)}" class="tutorial-img">`;
+            const iconHTML = (k) => `<img src="${k}.png" class="tutorial-img" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAwAB/AL+f4AAAAASUVORK5CYII='">`;
             list.innerHTML = `
                 <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Use ← / → keys.</div></div>
                 <div class="tutorial-item">${iconHTML('bug')} <div class="tutorial-text"><b>Bug</b>Bonus KPI (+10)</div></div>
@@ -524,18 +402,19 @@
             for(let i=0; i<10; i++) {
                 const img = document.createElement('img');
                 const type = icons[Math.floor(Math.random() * icons.length)];
-                img.src = getAssetSrc(type);
+                img.src = type + '.png'; // Direct load
                 img.className = 'floating-icon';
                 img.style.width = (40 + Math.random() * 40) + 'px';
                 img.style.left = Math.random() * 90 + '%';
                 img.style.top = Math.random() * 90 + '%';
                 img.style.animationDuration = (5 + Math.random() * 5) + 's';
+                img.onerror = function() { this.style.display = 'none'; }; // Hide if missing
                 container.appendChild(img);
             }
         };
         decorateHomePage();
 
-        // === 5. THREE.JS SCENE ===
+        // === 4. THREE.JS SCENE ===
         const scene=new THREE.Scene(); scene.background=new THREE.Color(0xdceefb); scene.fog=new THREE.Fog(0xdceefb,10,60);
         const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000); camera.position.set(0,5,8); camera.lookAt(0,0,-5);
         const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(window.innerWidth,window.innerHeight);
@@ -545,7 +424,7 @@
         const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,1000), new THREE.MeshPhongMaterial({color:0x34495e})); ground.rotation.x=-Math.PI/2; ground.position.z=-450; scene.add(ground);
         const grid=new THREE.GridHelper(200,100,0x555555,0x444444); grid.position.y=0.01; grid.position.z=-50; scene.add(grid);
 
-        // === 6. GAME LOGIC ===
+        // === 5. GAME LOGIC ===
         const randomQuestions = [
             {q:"If people below find you at same time, who will you reply first?", o:["Bestie","Family","Client","Your boss"], a:[2,3]},
             {q:"Which is team least order to eat in 2025?", o:["Mi bodoh","Mak cik","Anak jamil","MCD"], a:3},
@@ -614,7 +493,6 @@
             updateHUD();
 
             if(jijiMesh) scene.remove(jijiMesh);
-            // Game uses Run_1 initially, SIZE INCREASED to 3.2, Y lifted to 1.6
             jijiMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 3.2), mats.jiji_run_1); 
             jijiMesh.position.set(0, 1.6, 0); jijiMesh.castShadow=true; scene.add(jijiMesh);
             lane=1;
@@ -685,24 +563,17 @@
             setTimeout(() => { if(gameState=='PLAYING') msg.style.display = 'none'; }, 1000);
         }
 
+        // === ⚠️ 请在这里修改你的评分逻辑 ⚠️ ===
         function getComment(s) {
+            // 你说你要自己改，所以这里我先留着这个函数
+            // 你可以直接修改里面的文字
             let options = [];
             if(s < 0) {
-                options = ["💀 KPI in negative…<br>Are you working against the company?","🔥 Negative KPI spotted!<br>You officially created bugs faster than working hours.","🪦 KPI below zero…<br>HR might want to “chat” with you."];
-            } else if (s < 100) {
-                options = ["😢 Extremely low KPI…<br>At least you came to office?","🥲 KPI too weak…<br>Even your shadow works harder.","💤 KPI = barely alive.<br>Try waking up?"];
-            } else if (s < 200) {
-                options = ["😐 Still not enough…<br>But at least got something.","🙃 Mini KPI detected.<br>Your effort is on trial version.","😶 KPI slightly better…<br>But still need real motivation."];
-            } else if (s < 300) {
-                options = ["🙂 Not bad, not good…<br>You passed the “survival line”.","😌 Acceptable KPI.<br>You’re officially average!","👍 OK level.<br>Boss won’t scold you (for now)."];
-            } else if (s < 400) {
-                options = ["😀 Getting better!<br>Your KPI starts to have “human shape”.","😎 Almost respectable.<br>Keep going, you’re close!","💡 You are improving!<br>Your KPI is evolving…"];
-            } else if (s < 500) {
-                options = ["😄 Good effort!<br>Boss can smile at you already.","🎉 Almost there!<br>One more push and you’ll shine.","👏 Stable performance!<br>You are no longer “low risk”."];
+                options = ["💀 KPI in negative…<br>Are you working against the company?","🔥 Negative KPI spotted!<br>You officially created bugs faster than working hours."];
             } else if (s < 1000) {
-                options = ["🔥 Strong performance!<br>Your KPI is hotter than office WiFi.","💪 You carry the team quietly.<br>Respect.","🌟 Amazing progress!<br>Department’s rising star."];
+                options = ["🔥 Strong performance!<br>Your KPI is hotter than office WiFi.","💪 You carry the team quietly.<br>Respect."];
             } else {
-                options = ["🌈 Your KPI breaks the system.<br>Even the server kneels to you.","⚡ Workplace Legend!<br>HR wants to frame your photo.","👽 You are not human.<br>You are productivity itself."];
+                options = ["🌈 Your KPI breaks the system.<br>Even the server kneels to you.","⚡ Workplace Legend!<br>HR wants to frame your photo."];
             }
             return options[Math.floor(Math.random() * options.length)];
         }
