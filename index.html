@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v24.0 (Final Stable)</title>
+    <title>Jiji's Adventure v25.0 (Bold Ranking)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
@@ -137,14 +137,27 @@
             text-shadow: 4px 4px 10px rgba(0,0,0,0.5); display: none; z-index: 20;
         }
 
-        /* === Ranking Styles === */
+        /* === Ranking Styles (Updated v25) === */
         .ranking-row {
-            display: flex; justify-content: space-between; padding: 10px;
-            border-bottom: 1px solid #eee; font-size: 18px; color: #333;
+            display: flex; justify-content: space-between; padding: 12px;
+            border-bottom: 1px solid #ccc; /* Darker border */
+            font-size: 24px; /* BIGGER FONT */
+            font-weight: 900; /* BOLD */
+            color: black; /* BLACK COLOR */
+            align-items: center;
         }
-        .rank-num { font-weight: bold; color: #6c5ce7; width: 30px; }
-        .rank-name { flex-grow: 1; text-align: left; margin-left: 10px; font-weight: bold; }
-        .rank-score { color: #ffce00; font-weight: 900; text-shadow: 1px 1px 0 #999;}
+        .rank-num { 
+            color: #6c5ce7; width: 40px; text-align: left;
+        }
+        .rank-name { 
+            flex-grow: 1; text-align: left; margin-left: 10px; 
+            color: black; /* Force Name Black */
+        }
+        .rank-score { 
+            color: black; /* Force Score Black */
+            font-weight: 900; 
+            text-shadow: none; /* Removed Yellow Shadow */
+        }
 
         .input-group { margin-top: 15px; display: flex; gap: 10px; }
         #player-name-inp { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #ddd; font-size: 16px; }
@@ -276,17 +289,13 @@
             }
         } catch(e) { console.error("Firebase Config Error:", e); }
 
-        // === 1. ASSET MANAGEMENT (Direct Loading) ===
-        // We now directly try to load 'name.png'. 
-        // If it fails, Three.js will just not show it (invisible), or we could add error handling.
-        // For simplicity and to fix your "missing icons", we rely on the files being present.
-        
+        // === 1. ASSET MANAGEMENT ===
         function loadMat(name) {
             const tex = new THREE.TextureLoader().load(
                 name + '.png', 
-                (t) => { t.colorSpace = THREE.SRGBColorSpace; }, // Success
+                (t) => { t.colorSpace = THREE.SRGBColorSpace; },
                 undefined,
-                (err) => { console.warn("Failed to load image:", name + '.png'); } // Error
+                (err) => { console.warn("Failed to load image:", name + '.png'); }
             );
             return new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
         }
@@ -309,8 +318,7 @@
             if(!el) return;
             if(id === 'bgm') el.volume = 0.5;
             el.currentTime = 0;
-            // Catch error in case user hasn't interacted yet
-            el.play().catch(e => console.log("Sound blocked (click 'Start' first):", e));
+            el.play().catch(e => console.log("Sound blocked:", e));
         }
 
         // === 2. RANKING LOGIC ===
@@ -367,11 +375,10 @@
             }
         };
 
-        // === 3. MENU NAVIGATION LOGIC ===
+        // === 3. MENU NAVIGATION ===
         window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
         
         window.startGameLogic = () => {
-            // This click event is CRITICAL for unlocking audio in browsers
             playSound('bgm'); 
             initGame();
         };
@@ -402,13 +409,13 @@
             for(let i=0; i<10; i++) {
                 const img = document.createElement('img');
                 const type = icons[Math.floor(Math.random() * icons.length)];
-                img.src = type + '.png'; // Direct load
+                img.src = type + '.png'; 
                 img.className = 'floating-icon';
                 img.style.width = (40 + Math.random() * 40) + 'px';
                 img.style.left = Math.random() * 90 + '%';
                 img.style.top = Math.random() * 90 + '%';
                 img.style.animationDuration = (5 + Math.random() * 5) + 's';
-                img.onerror = function() { this.style.display = 'none'; }; // Hide if missing
+                img.onerror = function() { this.style.display = 'none'; }; 
                 container.appendChild(img);
             }
         };
@@ -562,21 +569,33 @@
             msg.style.display = 'block'; msg.style.fontSize = "60px";
             setTimeout(() => { if(gameState=='PLAYING') msg.style.display = 'none'; }, 1000);
         }
+       
 
-        // === ⚠️ 请在这里修改你的评分逻辑 ⚠️ ===
-        function getComment(s) {
+  // === ⚠️ 请在这里修改你的评分逻辑 ⚠️ ===
             // 你说你要自己改，所以这里我先留着这个函数
             // 你可以直接修改里面的文字
+function getComment(s) {
             let options = [];
             if(s < 0) {
-                options = ["💀 KPI in negative…<br>Are you working against the company?","🔥 Negative KPI spotted!<br>You officially created bugs faster than working hours."];
+                options = ["💀 KPI in negative…<br>Are you working against the company?","🔥 Negative KPI spotted!<br>You officially created bugs faster than working hours.","🪦 KPI below zero…<br>HR might want to “chat” with you."];
+            } else if (s < 100) {
+                options = ["😢 Extremely low KPI…<br>At least you came to office?","🥲 KPI too weak…<br>Even your shadow works harder.","💤 KPI = barely alive.<br>Try waking up?"];
+            } else if (s < 300) {
+                options = ["😐 Still not enough…<br>But at least got something.","🙃 Mini KPI detected.<br>Your effort is on trial version.","😶 KPI slightly better…<br>But still need real motivation."];
+            } else if (s < 500) {
+                options = ["🙂 Not bad, not good…<br>You passed the “survival line”.","😌 Acceptable KPI.<br>You’re officially average!","👍 OK level.<br>Boss won’t scold you (for now)."];
+            } else if (s < 800) {
+                options = ["😀 Getting better!<br>Your KPI starts to have “human shape”.","😎 Almost respectable.<br>Keep going, you’re close!","💡 You are improving!<br>Your KPI is evolving…"];
             } else if (s < 1000) {
-                options = ["🔥 Strong performance!<br>Your KPI is hotter than office WiFi.","💪 You carry the team quietly.<br>Respect."];
+                options = ["😄 Good effort!<br>Boss can smile at you already.","🎉 Almost there!<br>One more push and you’ll shine.","👏 Stable performance!<br>You are no longer “low risk”."];
+            } else if (s < 1250) {
+                options = ["🔥 Strong performance!<br>Your KPI is hotter than office WiFi.","💪 You carry the team quietly.<br>Respect.","🌟 Amazing progress!<br>Department’s rising star."];
             } else {
-                options = ["🌈 Your KPI breaks the system.<br>Even the server kneels to you.","⚡ Workplace Legend!<br>HR wants to frame your photo."];
+                options = ["🌈 Your KPI breaks the system.<br>Even the server kneels to you.","⚡ Workplace Legend!<br>HR wants to frame your photo.","👽 You are not human.<br>You are productivity itself."];
             }
             return options[Math.floor(Math.random() * options.length)];
         }
+		
 
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
