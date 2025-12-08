@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jiji Game - HR Admin Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 20px; color: #333; }
+        h1 { color: #6c5ce7; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #6c5ce7; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .btn { 
+            background: #00b894; color: white; border: none; padding: 10px 20px; 
+            border-radius: 5px; cursor: pointer; font-size: 16px; margin-bottom: 20px;
+        }
+        .btn:hover { background: #00a884; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 Jiji Adventure - Player Scores</h1>
+    <button class="btn" onclick="exportTableToCSV('jiji_scores.csv')">📥 Download Excel (CSV)</button>
+    <div id="loading">Loading data from Firebase...</div>
+    <table id="scoreTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Score</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 你的 Firebase 配置
+    const firebaseConfig = {
+        apiKey: "AIzaSyBd2xW-b9WNy8JmlSNdjsVEswzZHkr3-Hs",
+        authDomain: "jiji-adventure.firebaseapp.com",
+        projectId: "jiji-adventure",
+        storageBucket: "jiji-adventure.firebasestorage.app",
+        messagingSenderId: "215317927346",
+        appId: "1:215317927346:web:e71d19eeacc1271b1f00ab",
+        measurementId: "G-ZSPSHTN01L"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadData() {
+        try {
+            // 获取所有分数，按分数从高到低排序
+            const q = query(collection(db, "leaderboard"), orderBy("score", "desc"));
+            const querySnapshot = await getDocs(q);
+            
+            const tbody = document.getElementById('tableBody');
+            let rank = 1;
+
+            querySnapshot.forEach((doc) => {
+                const d = doc.data();
+                const row = `<tr>
+                    <td>${rank++}</td>
+                    <td>${d.name}</td>
+                    <td>${d.score}</td>
+                    <td>${new Date(d.date).toLocaleString()}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('scoreTable').style.display = 'table';
+
+        } catch (e) {
+            document.getElementById('loading').innerText = "Error loading data: " + e.message;
+        }
+    }
+
+    loadData();
+
+    // 导出 CSV 功能 (纯 JS 实现)
+    window.exportTableToCSV = (filename) => {
+        const csv = [];
+        const rows = document.querySelectorAll("table tr");
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = [], cols = rows[i].querySelectorAll("td, th");
+            for (let j = 0; j < cols.length; j++) 
+                row.push(cols[j].innerText);
+            csv.push(row.join(","));        
+        }
+
+        const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+        const downloadLink = document.createElement("a");
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+    };
+</script>
+
+</body>
+</html>
