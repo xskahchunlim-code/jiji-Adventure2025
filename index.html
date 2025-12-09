@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v32.0 (Fix Comments & Images)</title>
+    <title>Jiji's Adventure v33.0 (Debug Edition)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
@@ -179,6 +179,13 @@
             display: block; 
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); 
         }
+        
+        /* Debug Text Style */
+        #go-debug {
+            font-size: 12px; color: red; font-family: monospace;
+            background: #ffe6e6; padding: 2px 5px; border-radius: 4px;
+            margin-bottom: 10px; display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -252,11 +259,14 @@
         <div class="modal-box">
             <h2 id="go-title" style="font-size: 30px; color: #6c5ce7;">Evaluation Finished</h2>
             
-            <img id="go-img" src="" class="go-result-img" onerror="console.log('Missing img!'); this.src='jiji.png';">
+            <img id="go-img" src="" class="go-result-img" 
+                 onerror="document.getElementById('go-debug').innerText='❌ Not Found! Swapped to default.'; this.src='jiji.png';">
             
+            <div id="go-debug">Loading...</div>
+
             <div style="font-size: 60px; font-weight: 900; color: #ffce00; margin: 15px 0; text-shadow: 2px 2px 0 #ddd;" id="go-score">0</div>
             
-            <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
+            <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; min-height: 50px;"></div>
             
             <div class="input-group">
                 <input type="text" id="player-name-inp" placeholder="Enter Name" maxlength="10">
@@ -547,7 +557,11 @@
             document.getElementById('go-title').innerText = success ? "🎉 Perfect Attendance 🎉" : "Evaluation Finished";
             document.getElementById('go-score').innerText = score;
             
-            // Set dynamic image
+            // 1. Set Comment FIRST (Ensures text appears even if image fails)
+            let comment = success ? "Congrats on surviving 2025!<br>Jiji is proud of your Sport Club performance!<br>Keep it up next year!" : getComment(score);
+            document.getElementById('go-comment').innerHTML = comment;
+
+            // 2. Determine Image Name
             let imgName = 'jiji_working';
             if (score < 0) imgName = 'jiji_unbelieve';
             else if (score <= 500) imgName = 'jiji_working';
@@ -555,10 +569,9 @@
             else if (score <= 1500) imgName = 'jiji_celebrate';
             else imgName = 'jiji_is_god';
             
+            // 3. Set Debug Info & Source
+            document.getElementById('go-debug').innerText = "Trying to load: " + imgName + ".png";
             document.getElementById('go-img').src = imgName + '.png';
-
-            let comment = success ? "Congrats on surviving 2025!<br>Jiji is proud of your Sport Club performance!<br>Keep it up next year!" : getComment(score);
-            document.getElementById('go-comment').innerHTML = comment;
         }
 
         function animate() {
