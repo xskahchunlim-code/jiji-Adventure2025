@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v31.0 (Fix Ranking Layout)</title>
+    <title>Jiji's Adventure v32.0 (Fix Comments & Images)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
@@ -48,7 +48,7 @@
         .modal-box {
             background: white; padding: 30px; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            max-width: 750px; /* 宽度加宽 */
+            max-width: 750px;
             width: 95%; text-align: center;
             position: relative; animation: popIn 0.3s ease-out;
             max-height: 95vh; overflow-y: auto;
@@ -138,25 +138,17 @@
             text-shadow: 4px 4px 10px rgba(0,0,0,0.5); display: none; z-index: 20;
         }
 
-        /* === 🔥 Ranking Layout (Flexbox) === */
+        /* === Ranking Layout === */
         .ranking-layout { 
             display: flex; gap: 20px; align-items: flex-start; min-height: 300px;
-            /* Debug Border: 如果你看到这个红框，说明代码更新了！ */
-            /* border: 1px dashed red; */ 
         }
-        
-        /* Left Side: Score List */
         .ranking-left { 
             flex: 2; text-align: left; max-height: 300px; overflow-y: auto; 
         }
-        
-        /* Right Side: Jiji Animation */
         .ranking-right { 
             flex: 1; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            border-left: 2px solid #eee; /* 分割线 */
-            padding-left: 20px; 
-            min-width: 150px;
+            border-left: 2px solid #eee; padding-left: 20px; min-width: 150px;
         }
         
         .calc-anim-img { width: 100%; max-width: 140px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); }
@@ -184,7 +176,7 @@
         .go-result-img { 
             width: 200px; height: 200px; 
             object-fit: contain; margin: 10px auto; 
-            display: block; /* 强制显示占位，如果没图会看到破图图标 */
+            display: block; 
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); 
         }
     </style>
@@ -243,7 +235,6 @@
     <div id="ranking-modal" class="modal-overlay">
         <div class="modal-box">
             <h2 style="color: #6c5ce7;">🏆 Global Leaderboard</h2>
-            
             <div class="ranking-layout">
                 <div class="ranking-left" id="ranking-list">
                     <div style="color:#999; margin-top: 50px;">Connecting to Cloud...</div>
@@ -253,7 +244,6 @@
                     <div style="font-size:12px; color:#999; margin-top:5px; font-weight:bold;">HR Calculating...</div>
                 </div>
             </div>
-
             <button class="close-btn" onclick="closeModal('ranking-modal')">Close</button>
         </div>
     </div>
@@ -262,7 +252,12 @@
         <div class="modal-box">
             <h2 id="go-title" style="font-size: 30px; color: #6c5ce7;">Evaluation Finished</h2>
             
-          <img id="go-img" src="" class="go-result-img" onerror="console.log('Missing image!'); this.src='jiji.png';">            <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px;"></div>
+            <img id="go-img" src="" class="go-result-img" onerror="console.log('Missing img!'); this.src='jiji.png';">
+            
+            <div style="font-size: 60px; font-weight: 900; color: #ffce00; margin: 15px 0; text-shadow: 2px 2px 0 #ddd;" id="go-score">0</div>
+            
+            <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
+            
             <div class="input-group">
                 <input type="text" id="player-name-inp" placeholder="Enter Name" maxlength="10">
                 <button class="menu-btn" style="width: auto; padding: 10px 20px; font-size: 16px; margin: 0;" onclick="submitScore()">Submit</button>
@@ -337,41 +332,34 @@
             btn.innerText = originalText;
         };
 
-     // 🔥 RANKING ANIMATION LOGIC
-let rankAnimTimer = null;
-window.showRanking = async () => {
-    document.getElementById('ranking-modal').style.display = 'flex';
-    
-    // 动画逻辑：在 jiji_calc_1 到 3 之间循环
-    let f = 1;
-    const img = document.getElementById('rank-anim-jiji');
-    if(rankAnimTimer) clearInterval(rankAnimTimer);
+        // 🔥 RANKING ANIMATION (2 seconds)
+        let rankAnimTimer = null;
+        window.showRanking = async () => {
+            document.getElementById('ranking-modal').style.display = 'flex';
+            let f = 1;
+            const img = document.getElementById('rank-anim-jiji');
+            if(rankAnimTimer) clearInterval(rankAnimTimer);
+            rankAnimTimer = setInterval(() => {
+                f = f >= 3 ? 1 : f + 1;
+                img.src = `jiji_calc_${f}.png`;
+            }, 2000); 
 
-    // 👇 把这里的 200 改成 2000 (即 2秒)
-    rankAnimTimer = setInterval(() => {
-        f = f >= 3 ? 1 : f + 1;
-        img.src = `jiji_calc_${f}.png`;
-    }, 2000); 
-
-    const list = document.getElementById('ranking-list'); list.innerHTML = '<div style="color:#999; margin-top:50px;">Loading...</div>';
-    
-    // ... (剩下的 Firebase 代码保持不变) ...
-    if(!isFirebaseReady) { list.innerHTML = "Offline Mode (No Ranking)."; return; }
-    try {
-        const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
-        const querySnapshot = await getDocs(q);
-        list.innerHTML = ""; let rank = 1;
-        querySnapshot.forEach((doc) => {
-            const d = doc.data();
-            const row = document.createElement('div'); row.className = 'ranking-row';
-            let medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : rank));
-            row.innerHTML = `<span class="rank-num">${medal}</span> <span class="rank-name">${d.name}</span> <span class="rank-score">${d.score}</span>`;
-            list.appendChild(row); rank++;
-        });
-        if(rank === 1) list.innerHTML = "No scores yet. Be the first!";
-    } catch (e) { list.innerHTML = "Error loading rankings."; }
-};
-
+            const list = document.getElementById('ranking-list'); list.innerHTML = '<div style="color:#999; margin-top:50px;">Loading...</div>';
+            if(!isFirebaseReady) { list.innerHTML = "Offline Mode (No Ranking)."; return; }
+            try {
+                const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+                const querySnapshot = await getDocs(q);
+                list.innerHTML = ""; let rank = 1;
+                querySnapshot.forEach((doc) => {
+                    const d = doc.data();
+                    const row = document.createElement('div'); row.className = 'ranking-row';
+                    let medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : rank));
+                    row.innerHTML = `<span class="rank-num">${medal}</span> <span class="rank-name">${d.name}</span> <span class="rank-score">${d.score}</span>`;
+                    list.appendChild(row); rank++;
+                });
+                if(rank === 1) list.innerHTML = "No scores yet. Be the first!";
+            } catch (e) { list.innerHTML = "Error loading rankings."; }
+        };
 
         window.closeModal = (id) => { 
             if(id === 'ranking-modal' && rankAnimTimer) clearInterval(rankAnimTimer);
@@ -712,4 +700,3 @@ window.showRanking = async () => {
     </script>
 </body>
 </html>
-
