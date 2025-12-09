@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v33.0 (Debug Edition)</title>
+    <title>Jiji's Adventure v35.0</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
@@ -71,6 +71,14 @@
         #home-subtitle {
             font-size: 24px; color: #ffce00; margin-bottom: 30px; font-weight: bold;
             z-index: 102; text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+        }
+
+        /* 🔥 版本号水印 (Version Tag) */
+        .version-tag {
+            position: absolute; bottom: 10px; left: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px; font-weight: bold; font-family: monospace;
+            z-index: 110; pointer-events: none;
         }
 
         .menu-btn {
@@ -179,13 +187,6 @@
             display: block; 
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); 
         }
-        
-        /* Debug Text Style */
-        #go-debug {
-            font-size: 12px; color: red; font-family: monospace;
-            background: #ffe6e6; padding: 2px 5px; border-radius: 4px;
-            margin-bottom: 10px; display: inline-block;
-        }
     </style>
 </head>
 <body>
@@ -198,6 +199,8 @@
         
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
+        
+        <div class="version-tag">v35.0</div>
 
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
@@ -259,11 +262,8 @@
         <div class="modal-box">
             <h2 id="go-title" style="font-size: 30px; color: #6c5ce7;">Evaluation Finished</h2>
             
-            <img id="go-img" src="" class="go-result-img" 
-                 onerror="document.getElementById('go-debug').innerText='❌ Not Found! Swapped to default.'; this.src='jiji.png';">
+            <img id="go-img" src="" class="go-result-img" onerror="this.src='jiji.png';">
             
-            <div id="go-debug">Loading...</div>
-
             <div style="font-size: 60px; font-weight: 900; color: #ffce00; margin: 15px 0; text-shadow: 2px 2px 0 #ddd;" id="go-score">0</div>
             
             <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; min-height: 50px;"></div>
@@ -342,7 +342,7 @@
             btn.innerText = originalText;
         };
 
-        // 🔥 RANKING ANIMATION (2 seconds)
+        // 🔥 Ranking Animation
         let rankAnimTimer = null;
         window.showRanking = async () => {
             document.getElementById('ranking-modal').style.display = 'flex';
@@ -352,7 +352,7 @@
             rankAnimTimer = setInterval(() => {
                 f = f >= 3 ? 1 : f + 1;
                 img.src = `jiji_calc_${f}.png`;
-            }, 2000); 
+            }, 500); // 0.5s Animation speed (Standard)
 
             const list = document.getElementById('ranking-list'); list.innerHTML = '<div style="color:#999; margin-top:50px;">Loading...</div>';
             if(!isFirebaseReady) { list.innerHTML = "Offline Mode (No Ranking)."; return; }
@@ -550,28 +550,29 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
-        // 🔥 GAME OVER: DYNAMIC IMAGE & SCORING TWEAKS
+        // 🔥 GAME OVER: Updated Logic per request
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
             const modal = document.getElementById('game-over-modal'); modal.style.display = 'flex';
             document.getElementById('go-title').innerText = success ? "🎉 Perfect Attendance 🎉" : "Evaluation Finished";
             document.getElementById('go-score').innerText = score;
             
-            // 1. Set Comment FIRST (Ensures text appears even if image fails)
-            let comment = success ? "Congrats on surviving 2025!<br>Jiji is proud of your Sport Club performance!<br>Keep it up next year!" : getComment(score);
-            document.getElementById('go-comment').innerHTML = comment;
-
-            // 2. Determine Image Name
+            // 1. 设置动态图片文件名 (New Ranges)
             let imgName = 'jiji_working';
             if (score < 0) imgName = 'jiji_unbelieve';
-            else if (score <= 500) imgName = 'jiji_working';
-            else if (score <= 1000) imgName = 'jiji_happy';
-            else if (score <= 1500) imgName = 'jiji_celebrate';
-            else imgName = 'jiji_is_god';
+            else if (score < 250) imgName = 'jiji_cry';      // 0 - 249
+            else if (score <= 500) imgName = 'jiji_working';   // 250 - 500
+            else if (score <= 1000) imgName = 'jiji_happy';    // 501 - 1000
+            else if (score <= 1500) imgName = 'jiji_celebrate';// 1001 - 1500
+            else imgName = 'jiji_is_god';                      // > 1500
             
-            // 3. Set Debug Info & Source
-            document.getElementById('go-debug').innerText = "Trying to load: " + imgName + ".png";
-            document.getElementById('go-img').src = imgName + '.png';
+            // 2. 直接设置图片 (无保护机制, default fallback to jiji.png only if really broken)
+            const imgEl = document.getElementById('go-img');
+            imgEl.src = imgName + '.png';
+
+            // 3. 设置评语
+            let comment = success ? "Congrats on surviving 2025!<br>Jiji is proud of your Sport Club performance!<br>Keep it up next year!" : getComment(score);
+            document.getElementById('go-comment').innerHTML = comment;
         }
 
         function animate() {
@@ -600,17 +601,17 @@
                     const t=o.userData.type;
                     if(t=='bug') { score+=10; playSound('sfx-coin'); }
                     else if(t=='tea') { playSound('sfx-coin'); if(health<3){health++;showFloatingMsg("Healed!","pink");}else showFloatingMsg("Full HP!","pink"); }
-                    // 🔥 UPDATED: PC HIT = -1 Heart AND -10 Score
+                    // PC HIT = -1 Heart AND -10 Score
                     else if(t=='computer') { 
                         playSound('sfx-hit'); 
                         health--; 
-                        score -= 10; // New penalty
+                        score -= 10; 
                         showFloatingMsg("💔 -10", "red"); 
                         scene.background = new THREE.Color(0xff0000); setTimeout(()=>scene.background=new THREE.Color(0xdceefb),100); 
                         if(health<=0) triggerGameOver(false); 
                     }
                     else if(t=='fish') { score-=15; playSound('sfx-hit'); showFloatingMsg("Slacking -15", "#00bfff"); }
-                    // 🔥 UPDATED: ISO = +100 Score
+                    // ISO = +100 Score
                     else if(t=='iso') { 
                         isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); 
                         if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("BONUS +100!", "gold");} 
