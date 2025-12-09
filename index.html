@@ -262,8 +262,7 @@
         <div class="modal-box">
             <h2 id="go-title" style="font-size: 30px; color: #6c5ce7;">Evaluation Finished</h2>
             
-            <img id="go-img" src="" class="go-result-img" onerror="this.style.opacity='0.3'"> <div style="font-size: 60px; font-weight: 900; color: #ffce00; margin: 15px 0; text-shadow: 2px 2px 0 #ddd;" id="go-score">0</div>
-            <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px;"></div>
+          <img id="go-img" src="" class="go-result-img" onerror="console.log('Missing image!'); this.src='jiji.png';">            <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px;"></div>
             <div class="input-group">
                 <input type="text" id="player-name-inp" placeholder="Enter Name" maxlength="10">
                 <button class="menu-btn" style="width: auto; padding: 10px 20px; font-size: 16px; margin: 0;" onclick="submitScore()">Submit</button>
@@ -338,36 +337,41 @@
             btn.innerText = originalText;
         };
 
-        // 🔥 RANKING ANIMATION LOGIC
-        let rankAnimTimer = null;
-        window.showRanking = async () => {
-            document.getElementById('ranking-modal').style.display = 'flex';
-            
-            // 动画逻辑：在 jiji_calc_1 到 3 之间循环
-            let f = 1;
-            const img = document.getElementById('rank-anim-jiji');
-            if(rankAnimTimer) clearInterval(rankAnimTimer);
-            rankAnimTimer = setInterval(() => {
-                f = f >= 3 ? 1 : f + 1;
-                img.src = `jiji_calc_${f}.png`;
-            }, 200); // 0.2秒切换一次
+     // 🔥 RANKING ANIMATION LOGIC
+let rankAnimTimer = null;
+window.showRanking = async () => {
+    document.getElementById('ranking-modal').style.display = 'flex';
+    
+    // 动画逻辑：在 jiji_calc_1 到 3 之间循环
+    let f = 1;
+    const img = document.getElementById('rank-anim-jiji');
+    if(rankAnimTimer) clearInterval(rankAnimTimer);
 
-            const list = document.getElementById('ranking-list'); list.innerHTML = '<div style="color:#999; margin-top:50px;">Loading...</div>';
-            if(!isFirebaseReady) { list.innerHTML = "Offline Mode (No Ranking)."; return; }
-            try {
-                const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
-                const querySnapshot = await getDocs(q);
-                list.innerHTML = ""; let rank = 1;
-                querySnapshot.forEach((doc) => {
-                    const d = doc.data();
-                    const row = document.createElement('div'); row.className = 'ranking-row';
-                    let medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : rank));
-                    row.innerHTML = `<span class="rank-num">${medal}</span> <span class="rank-name">${d.name}</span> <span class="rank-score">${d.score}</span>`;
-                    list.appendChild(row); rank++;
-                });
-                if(rank === 1) list.innerHTML = "No scores yet. Be the first!";
-            } catch (e) { list.innerHTML = "Error loading rankings."; }
-        };
+    // 👇 把这里的 200 改成 2000 (即 2秒)
+    rankAnimTimer = setInterval(() => {
+        f = f >= 3 ? 1 : f + 1;
+        img.src = `jiji_calc_${f}.png`;
+    }, 2000); 
+
+    const list = document.getElementById('ranking-list'); list.innerHTML = '<div style="color:#999; margin-top:50px;">Loading...</div>';
+    
+    // ... (剩下的 Firebase 代码保持不变) ...
+    if(!isFirebaseReady) { list.innerHTML = "Offline Mode (No Ranking)."; return; }
+    try {
+        const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+        const querySnapshot = await getDocs(q);
+        list.innerHTML = ""; let rank = 1;
+        querySnapshot.forEach((doc) => {
+            const d = doc.data();
+            const row = document.createElement('div'); row.className = 'ranking-row';
+            let medal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : rank));
+            row.innerHTML = `<span class="rank-num">${medal}</span> <span class="rank-name">${d.name}</span> <span class="rank-score">${d.score}</span>`;
+            list.appendChild(row); rank++;
+        });
+        if(rank === 1) list.innerHTML = "No scores yet. Be the first!";
+    } catch (e) { list.innerHTML = "Error loading rankings."; }
+};
+
 
         window.closeModal = (id) => { 
             if(id === 'ranking-modal' && rankAnimTimer) clearInterval(rankAnimTimer);
@@ -708,3 +712,4 @@
     </script>
 </body>
 </html>
+
