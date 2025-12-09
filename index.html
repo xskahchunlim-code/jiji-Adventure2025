@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v25.0 (Bold Ranking)</title>
+    <title>Jiji's Adventure v28.0 (Final Integrated)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
@@ -48,9 +48,10 @@
         .modal-box {
             background: white; padding: 30px; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            max-width: 550px; width: 90%; text-align: center;
+            max-width: 700px; /* 稍微加宽以适应大图 */
+            width: 95%; text-align: center;
             position: relative; animation: popIn 0.3s ease-out;
-            max-height: 85vh; overflow-y: auto;
+            max-height: 95vh; overflow-y: auto;
         }
 
         /* === Home Screen === */
@@ -137,7 +138,7 @@
             text-shadow: 4px 4px 10px rgba(0,0,0,0.5); display: none; z-index: 20;
         }
 
-        /* === Ranking Styles (Updated v25) === */
+        /* === Ranking Styles (BOLD & BLACK) === */
         .ranking-row {
             display: flex; justify-content: space-between; padding: 12px;
             border-bottom: 1px solid #ccc; /* Darker border */
@@ -151,16 +152,30 @@
         }
         .rank-name { 
             flex-grow: 1; text-align: left; margin-left: 10px; 
-            color: black; /* Force Name Black */
+            color: black; 
         }
         .rank-score { 
-            color: black; /* Force Score Black */
+            color: black; 
             font-weight: 900; 
-            text-shadow: none; /* Removed Yellow Shadow */
+            text-shadow: none;
         }
 
         .input-group { margin-top: 15px; display: flex; gap: 10px; }
         #player-name-inp { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #ddd; font-size: 16px; }
+
+        /* === New Images Styles === */
+        .sc-img { 
+            width: 100%; 
+            height: auto; 
+            max-height: 350px; 
+            object-fit: contain; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+            display: none; /* Hidden by default */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .calc-img { width: 140px; height: 140px; object-fit: contain; margin: 10px auto; display: block; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); }
+
     </style>
 </head>
 <body>
@@ -231,6 +246,9 @@
     <div id="game-over-modal" class="modal-overlay">
         <div class="modal-box">
             <h2 id="go-title" style="font-size: 30px; color: #6c5ce7;">Evaluation Finished</h2>
+            
+            <img src="calculate_jiji.png" class="calc-img" onerror="this.style.display='none'">
+
             <div style="font-size: 60px; font-weight: 900; color: #ffce00; margin: 15px 0; text-shadow: 2px 2px 0 #ddd;" id="go-score">0</div>
             <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px;"></div>
             
@@ -245,8 +263,11 @@
 
     <div id="quiz-modal" class="modal-overlay">
         <div class="modal-box" style="border: 4px solid #6c5ce7;" id="quiz-box">
-            <h3 id="quiz-title" style="color:#6c5ce7; font-size: 24px;">Question</h3>
-            <p id="quiz-question" style="font-size: 18px; font-weight: bold;"></p>
+            <h3 id="quiz-title" style="color:#6c5ce7; font-size: 24px; margin-top:0;">Question</h3>
+            
+            <img id="quiz-sc-img" class="sc-img">
+
+            <p id="quiz-question" style="font-size: 22px; font-weight: bold; margin: 20px 0;"></p>
             <div id="quiz-options"></div>
         </div>
     </div>
@@ -458,6 +479,9 @@
             {q:"When QA report a bug, what developers usually say?", o:["Thank you QA!","Good job!","Let us cook!","Cannot reproduce."], a:3}
         ];
 
+        // 🔥 新增：题目池，用于不重复随机
+        let availableQIndices = [...Array(randomQuestions.length).keys()];
+
         const sportClubData = {
             "January": { theme: "CNY Event", questions: [ { q: "What is the game we play?", correct: "snake game", wrong: ["squid game", "snail game", "jiji game"] }, { q: "What are the games we NOT playing in January CNY event?", correct: "guess the word", wrong: ["throw 'orange'", "draw angpao", "freeze & stop!"] } ] },
             "February": { theme: "Go-Kart 🏎️", questions: [ { q: "Where do we play go-kart this month?", correct: "Element Mall", wrong: ["Melaka go-kart", "Pahlawan", "office"] }, { q: "Do we need to wear a safety helmet when playing?", correct: "No", wrong: ["Yes"] } ] },
@@ -494,6 +518,9 @@
             
             score=0; health=3; isoCount=0; gameSpeed = 0.28;
             currentMonth = 1; monthTimer = 0;
+            // 🔥 重置题库
+            availableQIndices = [...Array(randomQuestions.length).keys()];
+
             CLOCK.start();
 
             obstacles.forEach(o=>scene.remove(o)); obstacles.length=0;
@@ -569,33 +596,26 @@
             msg.style.display = 'block'; msg.style.fontSize = "60px";
             setTimeout(() => { if(gameState=='PLAYING') msg.style.display = 'none'; }, 1000);
         }
-       
 
-  // === ⚠️ 请在这里修改你的评分逻辑 ⚠️ ===
-            // 你说你要自己改，所以这里我先留着这个函数
-            // 你可以直接修改里面的文字
-function getComment(s) {
+        function getComment(s) {
             let options = [];
             if(s < 0) {
                 options = ["💀 KPI in negative…<br>Are you working against the company?","🔥 Negative KPI spotted!<br>You officially created bugs faster than working hours.","🪦 KPI below zero…<br>HR might want to “chat” with you."];
-            } else if (s < 100) {
+            } else if (s < 200) {
                 options = ["😢 Extremely low KPI…<br>At least you came to office?","🥲 KPI too weak…<br>Even your shadow works harder.","💤 KPI = barely alive.<br>Try waking up?"];
-            } else if (s < 300) {
-                options = ["😐 Still not enough…<br>But at least got something.","🙃 Mini KPI detected.<br>Your effort is on trial version.","😶 KPI slightly better…<br>But still need real motivation."];
             } else if (s < 500) {
-                options = ["🙂 Not bad, not good…<br>You passed the “survival line”.","😌 Acceptable KPI.<br>You’re officially average!","👍 OK level.<br>Boss won’t scold you (for now)."];
+                options = ["😐 Still not enough…<br>But at least got something.","🙃 Mini KPI detected.<br>Your effort is on trial version.","😶 KPI slightly better…<br>But still need real motivation."];
             } else if (s < 800) {
+                options = ["🙂 Not bad, not good…<br>You passed the “survival line”.","😌 Acceptable KPI.<br>You’re officially average!","👍 OK level.<br>Boss won’t scold you (for now)."];
+            } else if (s < 1200) {
                 options = ["😀 Getting better!<br>Your KPI starts to have “human shape”.","😎 Almost respectable.<br>Keep going, you’re close!","💡 You are improving!<br>Your KPI is evolving…"];
-            } else if (s < 1000) {
+            } else if (s < 1500) {
                 options = ["😄 Good effort!<br>Boss can smile at you already.","🎉 Almost there!<br>One more push and you’ll shine.","👏 Stable performance!<br>You are no longer “low risk”."];
-            } else if (s < 1250) {
-                options = ["🔥 Strong performance!<br>Your KPI is hotter than office WiFi.","💪 You carry the team quietly.<br>Respect.","🌟 Amazing progress!<br>Department’s rising star."];
             } else {
                 options = ["🌈 Your KPI breaks the system.<br>Even the server kneels to you.","⚡ Workplace Legend!<br>HR wants to frame your photo.","👽 You are not human.<br>You are productivity itself."];
             }
             return options[Math.floor(Math.random() * options.length)];
         }
-		
 
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
@@ -671,20 +691,49 @@ function getComment(s) {
             renderer.render(scene, camera); requestAnimationFrame(animate);
         }
 
+        // 🔥 UI 控制：显示/隐藏图片
+        function setQuizUI(isSC) {
+            const m = document.getElementById('quiz-modal'); m.style.display='flex';
+            const box = document.getElementById('quiz-box');
+            const scImg = document.getElementById('quiz-sc-img');
+            
+            if(isSC) {
+                document.getElementById('quiz-title').innerText = "🏋️‍♂️ Sport Club Event";
+                box.style.borderColor = "#00b894";
+                scImg.style.display = 'block';
+                // Load specific month image: img_quiz_sc_01.png to 12.png
+                let idx = currentMonth > 12 ? 12 : currentMonth;
+                let numStr = idx < 10 ? '0'+idx : idx;
+                scImg.src = `img_quiz_sc_${numStr}.png`;
+            } else {
+                document.getElementById('quiz-title').innerText = "🔥 Critical Question";
+                box.style.borderColor = "#6c5ce7";
+                scImg.style.display = 'none';
+            }
+        }
+
         function showRandomQuiz() {
             gameState = 'QUIZ'; 
-            const q = randomQuestions[Math.floor(Math.random()*randomQuestions.length)];
-            const m = document.getElementById('quiz-modal'); 
-            m.style.display='flex';
-            document.getElementById('quiz-title').innerText = "🔥 Critical Question";
-            document.getElementById('quiz-box').style.borderColor = "#6c5ce7";
+            setQuizUI(false); // 隐藏图片
+
+            // 逻辑：如果不重复，从池子取
+            if(availableQIndices.length === 0) {
+                availableQIndices = [...Array(randomQuestions.length).keys()];
+            }
+
+            const randIdx = Math.floor(Math.random() * availableQIndices.length);
+            const qIndex = availableQIndices[randIdx];
+            availableQIndices.splice(randIdx, 1);
+
+            const q = randomQuestions[qIndex];
+
             document.getElementById('quiz-question').innerText=q.q;
             const div = document.getElementById('quiz-options'); div.innerHTML='';
             
             q.o.forEach((opt,i)=>{
                 const b=document.createElement('button'); b.className='quiz-btn'; b.innerText=opt;
                 b.onclick=()=>{ 
-                    m.style.display='none'; 
+                    document.getElementById('quiz-modal').style.display='none'; 
                     let isCorrect = Array.isArray(q.a) ? q.a.includes(i) : q.a === i;
                     if(isCorrect) { score+=50; playSound('sfx-coin'); showFloatingMsg("Nice +50!", "green"); } 
                     else { score-=50; playSound('sfx-hit'); showFloatingMsg("Oh no -50!", "red"); } 
@@ -696,20 +745,19 @@ function getComment(s) {
 
         function showSportClub() {
             gameState = 'QUIZ';
-            const m = document.getElementById('quiz-modal');
             const monthKey = monthNames[currentMonth - 1]; 
             const data = sportClubData[monthKey];
             if (!data) { currentMonth++; startCountdown(); return; }
 
-            m.style.display = 'flex';
-            document.getElementById('quiz-title').innerText = `🏋️‍♂️ ${monthKey} Sport Club: ${data.theme}`;
-            document.getElementById('quiz-box').style.borderColor = "#00b894";
+            setQuizUI(true); // 显示图片
+            document.getElementById('quiz-title').innerText = `🏋️‍♂️ ${monthKey}: ${data.theme}`;
+            document.getElementById('quiz-question').innerText = ""; 
 
+            // Use the question from data
             const qObj = data.questions[Math.floor(Math.random() * data.questions.length)];
             document.getElementById('quiz-question').innerText = qObj.q;
 
             const div = document.getElementById('quiz-options'); div.innerHTML = '';
-
             let opts = [];
             if (monthKey === "December") opts = qObj.options.map(o => ({ text: o, isCorrect: true }));
             else {
@@ -721,8 +769,8 @@ function getComment(s) {
             opts.forEach(opt => {
                 const b = document.createElement('button'); b.className = 'quiz-btn'; b.innerText = opt.text;
                 b.onclick = () => {
-                    m.style.display = 'none';
-                    if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("Sport Club +25!", "#00b894"); }
+                    document.getElementById('quiz-modal').style.display='none'; 
+                    if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("Club +25!", "#00b894"); }
                     else { playSound('sfx-hit'); showFloatingMsg("It's ok +0", "gray"); }
                     updateHUD(); currentMonth++; monthTimer = 0;
                     if (currentMonth > 12) triggerGameOver(true);
