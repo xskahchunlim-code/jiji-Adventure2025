@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v30.0 (Dynamic Visuals)</title>
+    <title>Jiji's Adventure v29.0 (ISO Added to Tutorial)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
@@ -48,7 +48,7 @@
         .modal-box {
             background: white; padding: 30px; border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            max-width: 750px; /* 加宽以适应左右布局 */
+            max-width: 700px; 
             width: 95%; text-align: center;
             position: relative; animation: popIn 0.3s ease-out;
             max-height: 95vh; overflow-y: auto;
@@ -138,32 +138,26 @@
             text-shadow: 4px 4px 10px rgba(0,0,0,0.5); display: none; z-index: 20;
         }
 
-        /* === Ranking Styles (Flex Layout) === */
-        .ranking-layout { display: flex; gap: 20px; align-items: flex-start; min-height: 300px; }
-        .ranking-left { flex: 2; text-align: left; max-height: 300px; overflow-y: auto; }
-        .ranking-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #eee; padding-left: 10px; }
-        
-        .calc-anim-img { width: 100%; max-width: 150px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); }
-
+        /* === Ranking Styles (BOLD & BLACK) === */
         .ranking-row {
             display: flex; justify-content: space-between; padding: 12px;
             border-bottom: 1px solid #ccc;
-            font-size: 20px; font-weight: 900; color: black; align-items: center;
+            font-size: 24px; font-weight: 900; color: black; align-items: center;
         }
-        .rank-num { color: #6c5ce7; width: 35px; text-align: left; }
+        .rank-num { color: #6c5ce7; width: 40px; text-align: left; }
         .rank-name { flex-grow: 1; text-align: left; margin-left: 10px; color: black; }
-        .rank-score { color: black; font-weight: 900; }
+        .rank-score { color: black; font-weight: 900; text-shadow: none; }
 
         .input-group { margin-top: 15px; display: flex; gap: 10px; }
         #player-name-inp { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #ddd; font-size: 16px; }
 
-        /* === Game Images Styles === */
+        /* === Images Styles === */
         .sc-img { 
             width: 100%; height: auto; max-height: 350px; object-fit: contain; 
             border-radius: 10px; margin-bottom: 15px; display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .go-result-img { width: 180px; height: 180px; object-fit: contain; margin: 10px auto; display: block; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); }
+        .calc-img { width: 140px; height: 140px; object-fit: contain; margin: 10px auto; display: block; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); }
     </style>
 </head>
 <body>
@@ -207,9 +201,9 @@
                 <h4>🎯 Mission: Secure the Bonus!</h4>
                 <p>Jiji is sprinting through 2025 to hit the max <b>KPI</b> for a fat Year-End Bonus!</p>
                 <ul style="margin: 5px 0 10px 20px;">
-                    <li>Eat <b>Bugs</b> & avoid <b>PCs</b> (Hit PC: -10 KPI & -1 Heart!).</li>
+                    <li>Eat <b>Bugs</b> & avoid <b>PCs</b>.</li>
                     <li>Try to <b>Challenge (?)</b> questions!</li>
-                    <li>Collect 5 <b>ISO</b> for +100 Bonus!</li>
+                    <li>Collect <b>ISO</b> certificates!</li>
                 </ul>
             </div>
             <div class="tutorial-grid" id="tutorial-content"></div>
@@ -220,17 +214,9 @@
     <div id="ranking-modal" class="modal-overlay">
         <div class="modal-box">
             <h2 style="color: #6c5ce7;">🏆 Global Leaderboard</h2>
-            
-            <div class="ranking-layout">
-                <div class="ranking-left" id="ranking-list">
-                    <div style="color:#999; margin-top: 50px;">Connecting to Cloud...</div>
-                </div>
-                <div class="ranking-right">
-                    <img id="rank-anim-jiji" src="jiji_calc_1.png" class="calc-anim-img" alt="Calculating...">
-                    <div style="font-size:12px; color:#999; margin-top:5px; font-weight:bold;">HR Calculating...</div>
-                </div>
+            <div id="ranking-list" style="min-height: 200px; max-height: 300px; overflow-y: auto;">
+                <div style="color:#999; margin-top: 50px;">Connecting to Cloud...</div>
             </div>
-
             <button class="close-btn" onclick="closeModal('ranking-modal')">Close</button>
         </div>
     </div>
@@ -238,9 +224,7 @@
     <div id="game-over-modal" class="modal-overlay">
         <div class="modal-box">
             <h2 id="go-title" style="font-size: 30px; color: #6c5ce7;">Evaluation Finished</h2>
-            
-            <img id="go-img" src="" class="go-result-img" onerror="this.style.display='none'">
-
+            <img src="calculate_jiji.png" class="calc-img" onerror="this.style.display='none'">
             <div style="font-size: 60px; font-weight: 900; color: #ffce00; margin: 15px 0; text-shadow: 2px 2px 0 #ddd;" id="go-score">0</div>
             <div id="go-comment" style="font-size: 20px; color: #555; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 10px;"></div>
             <div class="input-group">
@@ -316,21 +300,8 @@
             catch (e) { alert("Error submitting: " + e.message); }
             btn.innerText = originalText;
         };
-
-        // 🔥 RANKING ANIMATION LOGIC
-        let rankAnimTimer = null;
         window.showRanking = async () => {
             document.getElementById('ranking-modal').style.display = 'flex';
-            
-            // Start Animation Loop (1, 2, 3)
-            let f = 1;
-            const img = document.getElementById('rank-anim-jiji');
-            if(rankAnimTimer) clearInterval(rankAnimTimer);
-            rankAnimTimer = setInterval(() => {
-                f = f >= 3 ? 1 : f + 1;
-                img.src = `jiji_calc_${f}.png`;
-            }, 200);
-
             const list = document.getElementById('ranking-list'); list.innerHTML = '<div style="color:#999; margin-top:50px;">Loading...</div>';
             if(!isFirebaseReady) { list.innerHTML = "Offline Mode (No Ranking)."; return; }
             try {
@@ -348,12 +319,10 @@
             } catch (e) { list.innerHTML = "Error loading rankings."; }
         };
 
-        window.closeModal = (id) => { 
-            if(id === 'ranking-modal' && rankAnimTimer) clearInterval(rankAnimTimer);
-            document.getElementById(id).style.display = 'none'; 
-        };
+        window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
         window.startGameLogic = () => { playSound('bgm'); initGame(); };
         
+        // 🔥 UPDATE: Added ISO to Tutorial
         window.showTutorial = () => {
             playSound('sfx-jump'); 
             const list = document.getElementById('tutorial-content');
@@ -361,9 +330,9 @@
             list.innerHTML = `
                 <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Use ← / → keys.</div></div>
                 <div class="tutorial-item">${iconHTML('bug')} <div class="tutorial-text"><b>Bug</b>Bonus KPI (+10)</div></div>
-                <div class="tutorial-item">${iconHTML('computer')} <div class="tutorial-text"><b>PC</b>Avoid! (-10 KPI & -1 Heart)</div></div>
+                <div class="tutorial-item">${iconHTML('computer')} <div class="tutorial-text"><b>PC</b>Avoid! Lose 1 Heart 💔</div></div>
                 <div class="tutorial-item">${iconHTML('quiz')} <div class="tutorial-text"><b>Challenge (?)</b>Answer for bonus!</div></div>
-                <div class="tutorial-item">${iconHTML('iso')} <div class="tutorial-text"><b>ISO</b>Collect 5 for Bonus (+100)!</div></div>
+                <div class="tutorial-item">${iconHTML('iso')} <div class="tutorial-text"><b>ISO</b>Collect 5 for Bonus (+50)!</div></div>
                 <div class="tutorial-item">${iconHTML('fish')} <div class="tutorial-text"><b>Salted Fish</b>Don't slack! (-15)</div></div>
             `;
             document.getElementById('tutorial-modal').style.display = 'flex';
@@ -500,8 +469,8 @@
             if(rand < 0.40) type='bug'; 
             else if(rand < 0.75) type='computer'; 
             else if(rand < 0.85) type='fish';  
-            else if(rand < 0.95) type='iso'; 
-            else if(rand < 0.98) type='tea'; 
+            else if(rand < 0.92) type='iso'; 
+            else if(rand < 0.96) type='tea'; 
             else type='quiz'; 
             let size = 1.8; if(type === 'bug') size = 3.0; if(type === 'computer') size = 2.0;
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(size,size), mats[type]);
@@ -527,23 +496,11 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
-        // 🔥 GAME OVER: DYNAMIC IMAGE & SCORING TWEAKS
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
             const modal = document.getElementById('game-over-modal'); modal.style.display = 'flex';
             document.getElementById('go-title').innerText = success ? "🎉 Perfect Attendance 🎉" : "Evaluation Finished";
             document.getElementById('go-score').innerText = score;
-            
-            // Set dynamic image
-            let imgName = 'jiji_working';
-            if (score < 0) imgName = 'jiji_unbelieve';
-            else if (score <= 500) imgName = 'jiji_working';
-            else if (score <= 1000) imgName = 'jiji_happy';
-            else if (score <= 1500) imgName = 'jiji_celebrate';
-            else imgName = 'jiji_is_god';
-            
-            document.getElementById('go-img').src = imgName + '.png';
-
             let comment = success ? "Congrats on surviving 2025!<br>Jiji is proud of your Sport Club performance!<br>Keep it up next year!" : getComment(score);
             document.getElementById('go-comment').innerHTML = comment;
         }
@@ -574,21 +531,9 @@
                     const t=o.userData.type;
                     if(t=='bug') { score+=10; playSound('sfx-coin'); }
                     else if(t=='tea') { playSound('sfx-coin'); if(health<3){health++;showFloatingMsg("Healed!","pink");}else showFloatingMsg("Full HP!","pink"); }
-                    // 🔥 UPDATED: PC HIT = -1 Heart AND -10 Score
-                    else if(t=='computer') { 
-                        playSound('sfx-hit'); 
-                        health--; 
-                        score -= 10; // New penalty
-                        showFloatingMsg("💔 -10", "red"); 
-                        scene.background = new THREE.Color(0xff0000); setTimeout(()=>scene.background=new THREE.Color(0xdceefb),100); 
-                        if(health<=0) triggerGameOver(false); 
-                    }
+                    else if(t=='computer') { playSound('sfx-hit'); health--; showFloatingMsg("💔", "red"); scene.background = new THREE.Color(0xff0000); setTimeout(()=>scene.background=new THREE.Color(0xdceefb),100); if(health<=0) triggerGameOver(false); }
                     else if(t=='fish') { score-=15; playSound('sfx-hit'); showFloatingMsg("Slacking -15", "#00bfff"); }
-                    // 🔥 UPDATED: ISO = +100 Score
-                    else if(t=='iso') { 
-                        isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); 
-                        if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("BONUS +100!", "gold");} 
-                    }
+                    else if(t=='iso') { isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); if(isoCount>=5){score+=50;isoCount=0;showFloatingMsg("BONUS!", "gold");} }
                     else if(t=='quiz') { playSound('sfx-jump'); scene.remove(o); obstacles.splice(i,1); showRandomQuiz(); return; }
                     scene.remove(o); obstacles.splice(i,1); updateHUD(); continue;
                 }
