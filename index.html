@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jiji's Adventure v38.0 (Turbo & Comments)</title>
+    <title>Jiji's Adventure v40.0 (Balanced Speed)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             user-select: none;
             touch-action: none;
+            cursor: pointer;
         }
         
         /* === UI Layer === */
@@ -57,6 +58,7 @@
             background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
             z-index: 200; flex-direction: column; align-items: center; justify-content: center;
             pointer-events: auto;
+            cursor: default;
         }
 
         .modal-box {
@@ -78,6 +80,7 @@
             background: linear-gradient(135deg, #6c5ce7, #a29bfe);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 100; overflow: hidden;
+            cursor: default;
         }
 
         #home-title {
@@ -208,7 +211,6 @@
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); 
         }
 
-        /* 🔥 评语样式加强：确保不被挡住 */
         #go-comment {
             font-size: 18px; color: #333; line-height: 1.5; 
             background: #fff4d3; padding: 15px; border-radius: 10px; 
@@ -229,7 +231,7 @@
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
         
-        <div class="version-tag">v38.0 (Turbo & Funny)</div>
+        <div class="version-tag">v40.0 (Balanced Speed)</div>
 
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
@@ -261,7 +263,7 @@
                 <h4>🎯 Mission: Secure the Bonus!</h4>
                 <p>Jiji is sprinting through 2025!</p>
                 <ul style="margin: 5px 0 10px 20px;">
-                    <li>💻 <b>PC/Mobile:</b> Keys or Tap Left/Right.</li>
+                    <li>🎮 <b>Control:</b> Click Left/Right, Tap, or Keys.</li>
                     <li>Eat <b>Bugs</b> & avoid <b>PCs</b> (Hit PC: -10 KPI & -1 Heart!).</li>
                     <li>Collect 5 <b>ISO</b> for +100 Bonus!</li>
                 </ul>
@@ -370,7 +372,6 @@
             btn.innerText = originalText;
         };
 
-        // Ranking Animation
         let rankAnimTimer = null;
         window.showRanking = async () => {
             document.getElementById('ranking-modal').style.display = 'flex';
@@ -410,7 +411,7 @@
             const list = document.getElementById('tutorial-content');
             const iconHTML = (k) => `<img src="${k}.png" class="tutorial-img" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAwAB/AL+f4AAAAASUVORK5CYII='">`;
             list.innerHTML = `
-                <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Use ← / → or Tap Screen.</div></div>
+                <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Keys, Tap, or Click.</div></div>
                 <div class="tutorial-item">${iconHTML('bug')} <div class="tutorial-text"><b>Bug</b>Bonus KPI (+10)</div></div>
                 <div class="tutorial-item">${iconHTML('computer')} <div class="tutorial-text"><b>PC</b>Avoid! (-10 KPI & -1 Heart)</div></div>
                 <div class="tutorial-item">${iconHTML('quiz')} <div class="tutorial-text"><b>Challenge (?)</b>Answer for bonus!</div></div>
@@ -455,7 +456,6 @@
 
         scene.add(new THREE.AmbientLight(0xffffff,0.7)); 
         const dl=new THREE.DirectionalLight(0xffffff,0.8); dl.position.set(5,10,5); scene.add(dl);
-        // 🔥 性能优化：移除了阴影相关的设置 (Shadows Disabled for FPS)
         
         const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,1000), new THREE.MeshPhongMaterial({color:0x34495e})); ground.rotation.x=-Math.PI/2; ground.position.z=-450; scene.add(ground);
         const grid=new THREE.GridHelper(200,100,0x555555,0x444444); grid.position.y=0.01; grid.position.z=-50; scene.add(grid);
@@ -504,7 +504,7 @@
 
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         let gameState='HOME', score=0, health=3, isoCount=0, frame=0, lane=1, jijiMesh;
-        let gameSpeed = 0.35; let isPaused = false; // 🔥 速度提升！
+        let gameSpeed = 0.30; let isPaused = false; // 🔥 Balanced Speed
         const CLOCK = new THREE.Clock(); const SECONDS_PER_MONTH = 15; 
         let currentMonth = 1; let monthTimer = 0; let animFrame = 0; 
         const obstacles=[], lanes=[-2.5,0,2.5]; 
@@ -514,7 +514,7 @@
             document.getElementById('ui-layer').style.display='flex';
             document.getElementById('game-over-modal').style.display='none';
             
-            score=0; health=3; isoCount=0; gameSpeed = 0.35; // 🔥 起步速度 0.35 (原0.28)
+            score=0; health=3; isoCount=0; gameSpeed = 0.30; 
             currentMonth = 1; monthTimer = 0;
             availableQIndices = [...Array(randomQuestions.length).keys()];
             CLOCK.start();
@@ -523,7 +523,6 @@
             if(jijiMesh) scene.remove(jijiMesh);
             jijiMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 3.2), mats.jiji_run_1); 
             jijiMesh.position.set(0, 1.6, 0); 
-            // jijiMesh.castShadow=true; // ❌ 移除阴影
             scene.add(jijiMesh);
             lane=1;
             startCountdown();
@@ -576,7 +575,6 @@
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(size,size), mats[type]);
             mesh.position.set(lanes[Math.floor(Math.random()*3)], size/2, -80); 
             mesh.userData={type}; 
-            // mesh.castShadow=true; // ❌ 移除阴影
             scene.add(mesh); obstacles.push(mesh);
         }
 
@@ -598,14 +596,12 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
-        // 🔥 GAME OVER: 强制显示评语
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
             const modal = document.getElementById('game-over-modal'); modal.style.display = 'flex';
             document.getElementById('go-title').innerText = success ? "🎉 Perfect Attendance 🎉" : "Evaluation Finished";
             document.getElementById('go-score').innerText = score;
             
-            // Image Logic
             let imgName = 'jiji_working';
             if (score < 0) imgName = 'jiji_unbelieve';
             else if (score < 250) imgName = 'jiji_cry';
@@ -616,21 +612,22 @@
             
             document.getElementById('go-img').src = imgName + '.png';
 
-            // Comment Logic
             let comment = success ? "Congrats on surviving 2025!<br>Jiji is proud of your Sport Club performance!<br>Keep it up next year!" : getComment(score);
             const commentBox = document.getElementById('go-comment');
             commentBox.innerHTML = comment;
-            commentBox.style.display = 'block'; // Ensure visibility
+            commentBox.style.display = 'block'; 
         }
 
-        window.addEventListener('touchstart', handleTouch, {passive: false});
-        function handleTouch(e) {
+        // 🔥 Unified Input Handler (Mouse + Touch)
+        function handleInput(x) {
             if(gameState !== 'PLAYING') return;
-            const touchX = e.touches[0].clientX;
             const halfWidth = window.innerWidth / 2;
-            if(touchX < halfWidth && lane > 0) { lane--; playSound('sfx-jump'); } 
-            else if(touchX > halfWidth && lane < 2) { lane++; playSound('sfx-jump'); }
+            if(x < halfWidth && lane > 0) { lane--; playSound('sfx-jump'); } 
+            else if(x > halfWidth && lane < 2) { lane++; playSound('sfx-jump'); }
         }
+
+        window.addEventListener('touchstart', e => handleInput(e.touches[0].clientX), {passive: false});
+        window.addEventListener('mousedown', e => handleInput(e.clientX));
 
         function animate() {
             if(gameState === 'COUNTDOWN') { if(jijiMesh) jijiMesh.position.y = 1.6 + Math.sin(Date.now() * 0.003) * 0.05; renderer.render(scene, camera); requestAnimationFrame(animate); return; }
@@ -642,7 +639,7 @@
             updateHUD();
             
             frame++; 
-            if(frame % 600 === 0 && gameSpeed < 0.55) gameSpeed += 0.01; // 🔥 最大速度也提升
+            if(frame % 600 === 0 && gameSpeed < 0.48) gameSpeed += 0.01; 
             let spawnRate = Math.floor(25 / gameSpeed); if(frame % spawnRate == 0) createObs();
 
             if(jijiMesh) {
