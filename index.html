@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jiji's Adventure v40.0 (Balanced Speed)</title>
+    <title>Jiji's Adventure v42.0 (Input Fix)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            user-select: none;
-            touch-action: none;
+            user-select: none; /* 禁止选中文本 */
+            -webkit-user-select: none;
+            touch-action: none; /* 禁止手机滑动 */
             cursor: pointer;
         }
         
+        /* 🔥 关键修复：禁止所有图片被拖拽 */
+        img {
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: none; /* 让点击穿透图片，直接点到背景，防止弹出菜单 */
+        }
+
         /* === UI Layer === */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -41,11 +49,13 @@
         #ui-calendar { color: #ffce00; min-width: 140px; text-align: center; }
 
         .btn-group { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; pointer-events: auto; }
+        /* 按钮内的图片允许点击 */
         .icon-btn {
             background: rgba(255, 255, 255, 0.2); border: 2px solid white;
             color: white; width: 50px; height: 50px; border-radius: 50%;
             cursor: pointer; font-weight: bold; font-size: 24px;
             transition: 0.3s; display: flex; align-items: center; justify-content: center;
+            pointer-events: auto; 
         }
         @media (max-width: 600px) {
             .btn-group { top: 10px; right: 10px; }
@@ -80,17 +90,17 @@
             background: linear-gradient(135deg, #6c5ce7, #a29bfe);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 100; overflow: hidden;
-            cursor: default;
+            cursor: default; 
         }
 
         #home-title {
             font-size: 60px; color: white; font-weight: 900; margin-bottom: 5px;
             text-shadow: 4px 4px 0px rgba(0,0,0,0.2); z-index: 102; text-align: center;
-            margin-top: -50px;
+            margin-top: -50px; pointer-events: none;
         }
         #home-subtitle {
             font-size: 24px; color: #ffce00; margin-bottom: 30px; font-weight: bold;
-            z-index: 102; text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+            z-index: 102; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); pointer-events: none;
         }
 
         @media (max-width: 600px) {
@@ -110,7 +120,7 @@
             padding: 15px 40px; margin: 8px; border-radius: 50px;
             font-size: 20px; font-weight: bold; cursor: pointer;
             width: 280px; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 102; position: relative;
+            z-index: 102; position: relative; pointer-events: auto; /* 按钮必须可点 */
         }
         .menu-btn:hover { transform: scale(1.05); background: #ffce00; color: white; }
         
@@ -124,6 +134,7 @@
             margin-bottom: 20px; z-index: 105;
             animation: sway 3s ease-in-out infinite;
             filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
+            pointer-events: none; /* 穿透，防止点到图片 */
         }
         @media (max-width: 600px) { #home-idle-jiji { width: 100px; height: 100px; } }
         
@@ -134,6 +145,8 @@
             width: 150px; height: 150px; object-fit: contain;
             z-index: 105;
             animation: runAcross 8s linear infinite;
+            will-change: transform, left;
+            pointer-events: none; /* 穿透 */
         }
         @keyframes runAcross { 0% { left: -150px; } 100% { left: 110%; } }
 
@@ -157,7 +170,8 @@
 
         .tutorial-grid { display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; }
         .tutorial-item { display: flex; align-items: center; background: #f8f9fa; padding: 10px; border-radius: 12px; border: 2px solid #eee; }
-        .tutorial-img { width: 50px; height: 50px; margin-right: 15px; object-fit: contain; background: #fff; border-radius: 50%; border: 2px solid #ddd; }
+        /* 这里的图片需要显示，但不能拖拽 */
+        .tutorial-img { width: 50px; height: 50px; margin-right: 15px; object-fit: contain; background: #fff; border-radius: 50%; border: 2px solid #ddd; pointer-events: none; }
         .tutorial-text { font-size: 15px; color: #555; }
         .tutorial-text b { color: #6c5ce7; font-size: 16px; display: block; margin-bottom: 2px; }
 
@@ -172,7 +186,7 @@
         #center-msg {
             position: absolute; top: 30%; width: 100%; text-align: center; 
             font-size: 80px; font-weight: 900; color: #ffce00; 
-            text-shadow: 4px 4px 10px rgba(0,0,0,0.5); display: none; z-index: 20;
+            text-shadow: 4px 4px 10px rgba(0,0,0,0.5); display: none; z-index: 20; pointer-events: none;
         }
 
         /* === Ranking Layout === */
@@ -191,7 +205,7 @@
             .ranking-layout { flex-direction: column-reverse; }
             .ranking-right { border-left: none; border-bottom: 2px solid #eee; padding-bottom: 20px; width: 100%; }
         }
-        .calc-anim-img { width: 100%; max-width: 140px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); }
+        .calc-anim-img { width: 100%; max-width: 140px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); pointer-events: none; }
         .ranking-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #ccc; font-size: 20px; font-weight: 900; color: black; align-items: center; }
         .rank-num { color: #6c5ce7; width: 35px; text-align: left; }
         .rank-name { flex-grow: 1; text-align: left; margin-left: 10px; color: black; }
@@ -201,7 +215,7 @@
         #player-name-inp { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #ddd; font-size: 16px; }
 
         /* === Game Images Styles === */
-        .sc-img { width: 100%; height: auto; max-height: 350px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .sc-img { width: 100%; height: auto; max-height: 350px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); pointer-events: none; }
         
         /* Game Over Result Image */
         .go-result-img { 
@@ -209,6 +223,7 @@
             object-fit: contain; margin: 10px auto; 
             display: block; 
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); 
+            pointer-events: none;
         }
 
         #go-comment {
@@ -220,9 +235,7 @@
         }
     </style>
 </head>
-<body>
-
-    <div id="canvas-container"></div>
+<body oncontextmenu="return false;"> <div id="canvas-container"></div>
 
     <div id="home-screen">
         <div id="home-title">Jiji's Adventure</div>
@@ -231,7 +244,7 @@
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
         
-        <div class="version-tag">v40.0 (Balanced Speed)</div>
+        <div class="version-tag">v42.0 (Fix SaveAs Issue)</div>
 
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
@@ -436,6 +449,19 @@
             }
         }; decorateHomePage();
 
+        // 🔥 EASTER EGG LOGIC
+        document.getElementById('home-screen').addEventListener('click', (e) => {
+            if(e.target.closest('button')) return;
+            const jiji = document.getElementById('home-run-jiji');
+            if(!jiji) return;
+            playSound('sfx-jump');
+            jiji.animate([
+                { transform: 'translateY(0)' },
+                { transform: 'translateY(-120px) scale(1.1)' },
+                { transform: 'translateY(0)' }
+            ], { duration: 500, easing: 'ease-out' });
+        });
+
         const scene=new THREE.Scene(); scene.background=new THREE.Color(0xdceefb); scene.fog=new THREE.Fog(0xdceefb,10,60);
         const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000); 
         
@@ -504,7 +530,7 @@
 
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         let gameState='HOME', score=0, health=3, isoCount=0, frame=0, lane=1, jijiMesh;
-        let gameSpeed = 0.30; let isPaused = false; // 🔥 Balanced Speed
+        let gameSpeed = 0.30; let isPaused = false; 
         const CLOCK = new THREE.Clock(); const SECONDS_PER_MONTH = 15; 
         let currentMonth = 1; let monthTimer = 0; let animFrame = 0; 
         const obstacles=[], lanes=[-2.5,0,2.5]; 
@@ -618,7 +644,7 @@
             commentBox.style.display = 'block'; 
         }
 
-        // 🔥 Unified Input Handler (Mouse + Touch)
+        // 🔥 关键修复：输入处理逻辑 (拦截默认事件)
         function handleInput(x) {
             if(gameState !== 'PLAYING') return;
             const halfWidth = window.innerWidth / 2;
@@ -626,134 +652,17 @@
             else if(x > halfWidth && lane < 2) { lane++; playSound('sfx-jump'); }
         }
 
-        window.addEventListener('touchstart', e => handleInput(e.touches[0].clientX), {passive: false});
-        window.addEventListener('mousedown', e => handleInput(e.clientX));
+        window.addEventListener('touchstart', e => {
+            // 在游戏中，阻止默认触摸行为（如滚动/长按）
+            if(gameState === 'PLAYING') e.preventDefault();
+            handleInput(e.touches[0].clientX);
+        }, {passive: false});
 
-        function animate() {
-            if(gameState === 'COUNTDOWN') { if(jijiMesh) jijiMesh.position.y = 1.6 + Math.sin(Date.now() * 0.003) * 0.05; renderer.render(scene, camera); requestAnimationFrame(animate); return; }
-            if(gameState === 'HOME') { renderer.render(scene, camera); requestAnimationFrame(animate); return; }
-            if(gameState !== 'PLAYING') return;
-
-            const delta = CLOCK.getDelta(); monthTimer += delta;
-            if(monthTimer >= SECONDS_PER_MONTH) { showSportClub(); return; }
-            updateHUD();
-            
-            frame++; 
-            if(frame % 600 === 0 && gameSpeed < 0.48) gameSpeed += 0.01; 
-            let spawnRate = Math.floor(25 / gameSpeed); if(frame % spawnRate == 0) createObs();
-
-            if(jijiMesh) {
-                jijiMesh.position.x += (lanes[lane]-jijiMesh.position.x)*0.15;
-                jijiMesh.position.y = 1.6 + Math.abs(Math.sin(frame*0.1))*0.1; 
-                jijiMesh.rotation.z = (jijiMesh.position.x - lanes[lane]) * -0.05;
-                if(frame % 10 === 0) { animFrame = (animFrame + 1) % 3; const runKey = `jiji_run_${animFrame+1}`; if(mats[runKey]) jijiMesh.material = mats[runKey]; }
-            }
-            
-            for(let i=obstacles.length-1; i>=0; i--){
-                const o = obstacles[i]; o.position.z += gameSpeed;
-                if(Math.abs(o.position.z - jijiMesh.position.z)<0.8 && Math.abs(o.position.x - jijiMesh.position.x)<1.0){
-                    const t=o.userData.type;
-                    if(t=='bug') { score+=10; playSound('sfx-coin'); }
-                    else if(t=='tea') { playSound('sfx-coin'); if(health<3){health++;showFloatingMsg("Healed!","pink");}else showFloatingMsg("Full HP!","pink"); }
-                    else if(t=='computer') { 
-                        playSound('sfx-hit'); 
-                        health--; score -= 10; 
-                        showFloatingMsg("💔 -10", "red"); 
-                        scene.background = new THREE.Color(0xff0000); setTimeout(()=>scene.background=new THREE.Color(0xdceefb),100); 
-                        if(health<=0) triggerGameOver(false); 
-                    }
-                    else if(t=='fish') { score-=15; playSound('sfx-hit'); showFloatingMsg("Slacking -15", "#00bfff"); }
-                    else if(t=='iso') { 
-                        isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); 
-                        if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("BONUS +100!", "gold");} 
-                    }
-                    else if(t=='quiz') { playSound('sfx-jump'); scene.remove(o); obstacles.splice(i,1); showRandomQuiz(); return; }
-                    scene.remove(o); obstacles.splice(i,1); updateHUD(); continue;
-                }
-                if(o.position.z>5) { scene.remove(o); obstacles.splice(i,1); }
-            }
-            grid.position.z += gameSpeed; if(grid.position.z>0) grid.position.z=-50;
-            renderer.render(scene, camera); requestAnimationFrame(animate);
-        }
-
-        function setQuizUI(isSC) {
-            const m = document.getElementById('quiz-modal'); m.style.display='flex';
-            const box = document.getElementById('quiz-box');
-            const scImg = document.getElementById('quiz-sc-img');
-            
-            if(isSC) {
-                document.getElementById('quiz-title').innerText = "🏋️‍♂️ Sport Club Event";
-                box.style.borderColor = "#00b894";
-                scImg.style.display = 'block';
-                let idx = currentMonth > 12 ? 12 : currentMonth;
-                let numStr = idx < 10 ? '0'+idx : idx;
-                scImg.src = `img_quiz_sc_${numStr}.png`;
-            } else {
-                document.getElementById('quiz-title').innerText = "🔥 Critical Question";
-                box.style.borderColor = "#6c5ce7";
-                scImg.style.display = 'none';
-            }
-        }
-
-        function showRandomQuiz() {
-            gameState = 'QUIZ'; 
-            setQuizUI(false);
-            if(availableQIndices.length === 0) { availableQIndices = [...Array(randomQuestions.length).keys()]; }
-            const randIdx = Math.floor(Math.random() * availableQIndices.length);
-            const qIndex = availableQIndices[randIdx];
-            availableQIndices.splice(randIdx, 1);
-            const q = randomQuestions[qIndex];
-
-            document.getElementById('quiz-question').innerText=q.q;
-            const div = document.getElementById('quiz-options'); div.innerHTML='';
-            q.o.forEach((opt,i)=>{
-                const b=document.createElement('button'); b.className='quiz-btn'; b.innerText=opt;
-                b.onclick=()=>{ 
-                    document.getElementById('quiz-modal').style.display='none'; 
-                    let isCorrect = Array.isArray(q.a) ? q.a.includes(i) : q.a === i;
-                    if(isCorrect) { score+=50; playSound('sfx-coin'); showFloatingMsg("Nice +50!", "green"); } 
-                    else { score-=50; playSound('sfx-hit'); showFloatingMsg("Oh no -50!", "red"); } 
-                    updateHUD(); setTimeout(() => startCountdown(), 500);
-                };
-                div.appendChild(b);
-            });
-        }
-
-        function showSportClub() {
-            gameState = 'QUIZ';
-            const monthKey = monthNames[currentMonth - 1]; 
-            const data = sportClubData[monthKey];
-            if (!data) { currentMonth++; startCountdown(); return; }
-
-            setQuizUI(true); 
-            document.getElementById('quiz-title').innerText = `🏋️‍♂️ ${monthKey}: ${data.theme}`;
-            document.getElementById('quiz-question').innerText = ""; 
-
-            const qObj = data.questions[Math.floor(Math.random() * data.questions.length)];
-            document.getElementById('quiz-question').innerText = qObj.q;
-
-            const div = document.getElementById('quiz-options'); div.innerHTML = '';
-            let opts = [];
-            if (monthKey === "December") opts = qObj.options.map(o => ({ text: o, isCorrect: true }));
-            else {
-                opts.push({ text: qObj.correct, isCorrect: true });
-                qObj.wrong.forEach(w => opts.push({ text: w, isCorrect: false }));
-                opts.sort(() => Math.random() - 0.5);
-            }
-
-            opts.forEach(opt => {
-                const b = document.createElement('button'); b.className = 'quiz-btn'; b.innerText = opt.text;
-                b.onclick = () => {
-                    document.getElementById('quiz-modal').style.display='none'; 
-                    if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("Club +25!", "#00b894"); }
-                    else { playSound('sfx-hit'); showFloatingMsg("It's ok +0", "gray"); }
-                    updateHUD(); currentMonth++; monthTimer = 0;
-                    if (currentMonth > 12) triggerGameOver(true);
-                    else setTimeout(() => startCountdown(), 500);
-                };
-                div.appendChild(b);
-            });
-        }
+        window.addEventListener('mousedown', e => {
+            // 阻止默认点击行为（如选中图片/拖拽）
+            if(gameState === 'PLAYING') e.preventDefault();
+            handleInput(e.clientX);
+        });
 
         window.addEventListener('keydown', e=>{ 
             if(e.key === 'p' || e.key === 'P') togglePause();
