@@ -88,22 +88,26 @@
         <button class="menu-btn" onclick="location.reload()" style="background:#ff7675; color:white;">Back to Home</button>
     </div>
 
-    <div id="tutorial-modal" class="modal-overlay">
+ <div id="tutorial-modal" class="modal-overlay">
         <div class="modal-box">
-            <h2 style="color: #6c5ce7; margin-bottom: 15px;">📖 How to Play</h2>
+            <h2 style="color: #6c5ce7; font-size: 28px; margin-bottom: 15px;">📖 How to Play</h2>
             <div class="story-text">
-                <p>Jiji is sprinting through 2025!</p>
+                <h4>🎯 Mission: Secure the Bonus!</h4>
+                <p>Jiji is sprinting through 2025 to hit the max <b>KPI</b> for a fat Year-End Bonus!</p>
                 <ul style="margin: 5px 0 10px 20px;">
-                    <li>🎮 <b>Control:</b> Click Left/Right, Tap, or Keys.</li>
-                    <li>Eat <b>Bugs</b> & avoid <b>PCs</b> (-10 KPI).</li>
-                    <li>Collect 5 <b>ISO</b> for +100 Bonus!</li>
+                    <li>Eat <b>Bugs</b> & avoid <b>PCs</b>.</li>
+                    <li>Try to <b>Challenge (?)</b> questions!</li>
+                    <li>Don't be a <b>"Salted Fish"</b>!</li>
                 </ul>
+                <p style="font-size: 13px;"><b>📅 Monthly Sport Club:</b> Every month will have sport club quiz session! Try to get extra <b>ESG Points</b>! (It won't hurt your KPI if you fail).</p>
             </div>
             <div class="tutorial-grid" id="tutorial-content"></div>
             <button class="close-btn" onclick="closeModal('tutorial-modal')">Let's Go!</button>
         </div>
     </div>
-
+	
+	
+	
     <div id="ranking-modal" class="modal-overlay">
         <div class="modal-box">
             <h2 style="color: #6c5ce7;">🏆 Global Leaderboard</h2>
@@ -430,16 +434,16 @@
         window.addEventListener('resize', adjustCamera);
 
         initThreeJS();
-        window.showTutorial = () => {
+         window.showTutorial = () => {
             playSound('sfx-jump'); 
             const list = document.getElementById('tutorial-content');
             const iconHTML = (k) => `<img src="${k}.png" class="tutorial-img" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAwAB/AL+f4AAAAASUVORK5CYII='">`;
             list.innerHTML = `
-                <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Keys, Tap, or Click.</div></div>
+                <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Use ← / → keys.</div></div>
                 <div class="tutorial-item">${iconHTML('bug')} <div class="tutorial-text"><b>Bug</b>Bonus KPI (+10)</div></div>
-                <div class="tutorial-item">${iconHTML('computer')} <div class="tutorial-text"><b>PC</b>Avoid! (-10 KPI & -1 Heart)</div></div>
+                <div class="tutorial-item">${iconHTML('computer')} <div class="tutorial-text"><b>PC</b>Avoid! Lose 1 Heart 💔</div></div>
                 <div class="tutorial-item">${iconHTML('quiz')} <div class="tutorial-text"><b>Challenge (?)</b>Answer for bonus!</div></div>
-                <div class="tutorial-item">${iconHTML('iso')} <div class="tutorial-text"><b>ISO</b>Collect 5 for Bonus (+100)!</div></div>
+                <div class="tutorial-item">${iconHTML('fish')} <div class="tutorial-text"><b>Salted Fish</b>Don't slack! (-15)</div></div>
             `;
             document.getElementById('tutorial-modal').style.display = 'flex';
         };
