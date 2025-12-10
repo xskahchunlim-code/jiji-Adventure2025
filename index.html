@@ -92,7 +92,7 @@
         <div id="home-subtitle">~ Work Hard, Play Hard ~</div>
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
-        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v49.0 (UI Restoration)</div>
+        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0 (Released)</div>
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
         <button class="menu-btn" onclick="showRanking()">Ranking</button>
@@ -308,17 +308,38 @@
             document.getElementById('ui-hearts').innerText = "❤️".repeat(health) + "🖤".repeat(3-health);
             document.getElementById('ui-iso').innerText = `ISO: ${isoCount}/5`;
         }
-
-        function createObs() {
+		
+		
+function createObs() {
             const rand = Math.random();
             let type = 'bug';
-            if(rand < 0.40) type='bug'; else if(rand < 0.75) type='computer'; else if(rand < 0.85) type='fish'; else if(rand < 0.95) type='iso'; else if(rand < 0.95) type='tea'; else type='quiz'; 
+            
+            // 0% - 40% : Bug (40% 概率)
+            if(rand < 0.40) type='bug'; 
+            
+            // 40% - 75% : 电脑 (35% 概率)
+            else if(rand < 0.75) type='computer'; 
+            
+            // 75% - 85% : 咸鱼 (10% 概率)
+            else if(rand < 0.85) type='fish';  
+            
+            // 85% - 90% : ISO (5% 概率)
+            else if(rand < 0.90) type='iso'; 
+            
+            // 90% - 95% : 奶茶 (5% 概率) -> 🔥 这里改好了，和 ISO 一样概率
+            else if(rand < 0.95) type='tea'; 
+            
+            // 95% - 100% : 问号 (5% 概率)
+            else type='quiz'; 
+            
             let size = 1.8; if(type === 'bug') size = 3.0; if(type === 'computer') size = 2.0;
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(size,size), mats[type]);
             mesh.position.set(lanes[Math.floor(Math.random()*3)], size/2, -80); 
             mesh.userData={type}; 
             scene.add(mesh); obstacles.push(mesh);
         }
+		
+		
 
         function showFloatingMsg(text, color) {
             const msg = document.getElementById('center-msg'); msg.innerText = text; msg.style.color = color;
@@ -423,7 +444,7 @@
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
             document.getElementById('game-over-modal').style.display = 'flex';
-            document.getElementById('go-title').innerText = success ? "🎉 Perfect Attendance 🎉" : "Evaluation Finished";
+            document.getElementById('go-title').innerText = success ? "🎉 Congrats on surviving 2025🎉" : "Evaluation Finished, Keep improve";
             document.getElementById('go-score').innerText = score;
             let imgName = 'jiji_working';
             if (score < 0) imgName = 'jiji_unbelieve'; else if (score < 250) imgName = 'jiji_cry'; else if (score <= 500) imgName = 'jiji_working'; else if (score <= 1000) imgName = 'jiji_happy'; else if (score <= 1500) imgName = 'jiji_celebrate'; else imgName = 'jiji_is_god';
@@ -509,7 +530,7 @@
                 b.onclick = () => {
                     document.getElementById('quiz-modal').style.display='none'; 
                     if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("ESG Increase! +25", "#00b894"); }
-                    else { playSound('sfx-hit'); showFloatingMsg("Join more activity..+0", "red"); }
+                    else { playSound('sfx-hit'); showFloatingMsg("Join more activity", "red"); }
                     updateHUD(); currentMonth++; monthTimer = 0;
                     if (currentMonth > 12) triggerGameOver(true); else setTimeout(() => startCountdown(), 500);
                 };
