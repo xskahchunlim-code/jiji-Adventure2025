@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jiji's Adventure v35.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jiji's Adventure v36.0 (Mobile Support)</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background-color: #f0f2f5; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             user-select: none;
+            touch-action: none; /* 禁止手机浏览器的默认滑动行为 */
         }
         
         /* === UI Layer === */
@@ -26,7 +28,12 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        #ui-calendar { color: #ffce00; min-width: 140px; text-align: center; }
+        /* 手机适配：HUD 字体稍微调小一点，防止换行 */
+        @media (max-width: 600px) {
+            .hud-bar { font-size: 14px; padding: 8px 15px; gap: 10px; width: 90%; justify-content: center; }
+        }
+
+        #ui-calendar { color: #ffce00; min-width: 100px; text-align: center; }
 
         .btn-group { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; pointer-events: auto; }
         .icon-btn {
@@ -68,12 +75,17 @@
             margin-top: -50px;
         }
 
+        @media (max-width: 600px) {
+            #home-title { font-size: 40px; margin-top: -20px; }
+            #home-subtitle { font-size: 18px; }
+        }
+
         #home-subtitle {
             font-size: 24px; color: #ffce00; margin-bottom: 30px; font-weight: bold;
             z-index: 102; text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
         }
 
-        /* 🔥 版本号水印 (Version Tag) */
+        /* Version Tag */
         .version-tag {
             position: absolute; bottom: 10px; left: 15px;
             color: rgba(255, 255, 255, 0.6);
@@ -159,6 +171,11 @@
             border-left: 2px solid #eee; padding-left: 20px; min-width: 150px;
         }
         
+        @media (max-width: 600px) {
+            .ranking-layout { flex-direction: column-reverse; }
+            .ranking-right { border-left: none; border-bottom: 2px solid #eee; padding-bottom: 20px; width: 100%; }
+        }
+
         .calc-anim-img { width: 100%; max-width: 140px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1)); }
 
         .ranking-row {
@@ -200,7 +217,7 @@
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
         
-        <div class="version-tag">v35.0</div>
+        <div class="version-tag">v36.0 (Mobile Ready)</div>
 
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
@@ -232,8 +249,8 @@
                 <h4>🎯 Mission: Secure the Bonus!</h4>
                 <p>Jiji is sprinting through 2025 to hit the max <b>KPI</b> for a fat Year-End Bonus!</p>
                 <ul style="margin: 5px 0 10px 20px;">
+                    <li>💻 <b>PC/Mobile:</b> Keys or Tap Left/Right.</li>
                     <li>Eat <b>Bugs</b> & avoid <b>PCs</b> (Hit PC: -10 KPI & -1 Heart!).</li>
-                    <li>Try to <b>Challenge (?)</b> questions!</li>
                     <li>Collect 5 <b>ISO</b> for +100 Bonus!</li>
                 </ul>
             </div>
@@ -352,7 +369,7 @@
             rankAnimTimer = setInterval(() => {
                 f = f >= 3 ? 1 : f + 1;
                 img.src = `jiji_calc_${f}.png`;
-            }, 500); // 0.5s Animation speed (Standard)
+            }, 500); 
 
             const list = document.getElementById('ranking-list'); list.innerHTML = '<div style="color:#999; margin-top:50px;">Loading...</div>';
             if(!isFirebaseReady) { list.innerHTML = "Offline Mode (No Ranking)."; return; }
@@ -382,7 +399,7 @@
             const list = document.getElementById('tutorial-content');
             const iconHTML = (k) => `<img src="${k}.png" class="tutorial-img" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAwAB/AL+f4AAAAASUVORK5CYII='">`;
             list.innerHTML = `
-                <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Use ← / → keys.</div></div>
+                <div class="tutorial-item">${iconHTML('jiji_run_1')} <div class="tutorial-text"><b>Controls</b>Use ← / → or Tap Screen.</div></div>
                 <div class="tutorial-item">${iconHTML('bug')} <div class="tutorial-text"><b>Bug</b>Bonus KPI (+10)</div></div>
                 <div class="tutorial-item">${iconHTML('computer')} <div class="tutorial-text"><b>PC</b>Avoid! (-10 KPI & -1 Heart)</div></div>
                 <div class="tutorial-item">${iconHTML('quiz')} <div class="tutorial-text"><b>Challenge (?)</b>Answer for bonus!</div></div>
@@ -452,9 +469,9 @@
             "June": { theme: "Taman Botanikal Melaka 🌿", questions: [ { q: "We go Taman Botanikal to?", correct: "walk", wrong: ["run", "cycling", "eat"] }, { q: "What animal did we not see on that day?", correct: "cat", wrong: ["monkey", "squirrel", "spider"] } ] },
             "July": { theme: "Cinema Experience in Office 🎬", questions: [ { q: "What movie did the team watch?", correct: "KPOP Demon Hunter", wrong: ["Fantastic Four", "KPOP Demon Slayer", "Ne Zha 2"] }, { q: "What food did we have on movie day?", correct: "super ring, burger, potato chips", wrong: ["popcorn"] } ] },
             "August": { theme: "SNOWLIM WONDERLAND ❄️", questions: [ { q: "What happened on that day?", correct: "Ms Kan busy finding phone", wrong: ["Lim made QZ fall down", "Ainul drove us there", "Shu Ting & KK met CSH staff"] }, { q: "In a cold environment, what do we need to take care of?", correct: "Keep body warm (Prevent Hypothermia)", wrong: ["Drink iced coffee", "Wear short pants", "Apply sunblock only"] } ] },
-            "September": { theme: "Mooncake & Halloween 🌕🎃", questions: [ { q: "Who is not in the squad team?", correct: "Aqilah", wrong: ["Shu Yee", "PP", "Julie"] }, { q: "In one of the Mooncake stories, which animal was not mentioned?", correct: "chicken", wrong: ["rabbit", "fox", "monkey"] } ] },
-            "October": { theme: "Skechers Friendship Walk 👟", questions: [ { q: "Team go run at KL,but what event they go?", correct: "Skechers Friendship Walk", wrong: ["Nike Friendship Walk", "Skechers Health Run", "Nike Family Walk"] }, { q: "What color of tshirt for the event?", correct: "blue", wrong: ["white", "red", "yellow"] } ] },
-			"November": { theme: "Golf Discover Day 🏌️‍♀️", questions: [ { q: "How many balls did we play on that day?", correct: "200", wrong: ["100", "150", "250"] }, { q: "Who is the MVP?", correct: "Chung Aik", wrong: ["Ms Kan", "Dahlia", "Qing Zhe"] } ] },
+            "September": { theme: "Skechers Friendship Walk 👟", questions: [ { q: "Team go run at KL,but what event they go?", correct: "Skechers Friendship Walk", wrong: ["Nike Friendship Walk", "Skechers Health Run", "Nike Family Walk"] }, { q: "What color of tshirt for the event?", correct: "blue", wrong: ["white", "red", "yellow"] } ] },
+            "October": { theme: "Mooncake & Halloween 🌕🎃", questions: [ { q: "Who is not in the squad team?", correct: "Aqilah", wrong: ["Shu Yee", "PP", "Julie"] }, { q: "In one of the Mooncake stories, which animal was not mentioned?", correct: "chicken", wrong: ["rabbit", "fox", "monkey"] } ] },
+            "November": { theme: "Golf Discover Day 🏌️‍♀️", questions: [ { q: "How many balls did we play on that day?", correct: "200", wrong: ["100", "150", "250"] }, { q: "Who is the MVP?", correct: "Chung Aik", wrong: ["Ms Kan", "Dahlia", "Qing Zhe"] } ] },
             "December": { theme: "Xmas Time 🎅", questions: [ { q: "Do you enjoy this year's activities?", correct: "All", options: ["1 star", "2 stars", "3 stars", "5 stars!"] } ] }
         };
 
@@ -550,29 +567,41 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
-        // 🔥 GAME OVER: Updated Logic per request
+        // 🔥 GAME OVER: DYNAMIC IMAGE & SCORING TWEAKS
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
             const modal = document.getElementById('game-over-modal'); modal.style.display = 'flex';
             document.getElementById('go-title').innerText = success ? "🎉 Perfect Attendance 🎉" : "Evaluation Finished";
             document.getElementById('go-score').innerText = score;
             
-            // 1. 设置动态图片文件名 (New Ranges)
+            // Set dynamic image
             let imgName = 'jiji_working';
             if (score < 0) imgName = 'jiji_unbelieve';
-            else if (score < 250) imgName = 'jiji_cry';      // 0 - 249
-            else if (score <= 500) imgName = 'jiji_working';   // 250 - 500
-            else if (score <= 1000) imgName = 'jiji_happy';    // 501 - 1000
-            else if (score <= 1500) imgName = 'jiji_celebrate';// 1001 - 1500
-            else imgName = 'jiji_is_god';                      // > 1500
+            else if (score < 250) imgName = 'jiji_cry';  // 🔥 0 - 249 NEW
+            else if (score <= 500) imgName = 'jiji_working';
+            else if (score <= 1000) imgName = 'jiji_happy';
+            else if (score <= 1500) imgName = 'jiji_celebrate';
+            else imgName = 'jiji_is_god';
             
-            // 2. 直接设置图片 (无保护机制, default fallback to jiji.png only if really broken)
-            const imgEl = document.getElementById('go-img');
-            imgEl.src = imgName + '.png';
+            document.getElementById('go-img').src = imgName + '.png';
 
-            // 3. 设置评语
             let comment = success ? "Congrats on surviving 2025!<br>Jiji is proud of your Sport Club performance!<br>Keep it up next year!" : getComment(score);
             document.getElementById('go-comment').innerHTML = comment;
+        }
+
+        // 🔥 Mobile Touch Support
+        window.addEventListener('touchstart', handleTouch, {passive: false});
+        function handleTouch(e) {
+            if(gameState !== 'PLAYING') return;
+            // e.preventDefault(); // Optional: prevent scrolling
+            const touchX = e.touches[0].clientX;
+            const halfWidth = window.innerWidth / 2;
+            
+            if(touchX < halfWidth && lane > 0) {
+                lane--; playSound('sfx-jump');
+            } else if(touchX > halfWidth && lane < 2) {
+                lane++; playSound('sfx-jump');
+            }
         }
 
         function animate() {
@@ -601,17 +630,17 @@
                     const t=o.userData.type;
                     if(t=='bug') { score+=10; playSound('sfx-coin'); }
                     else if(t=='tea') { playSound('sfx-coin'); if(health<3){health++;showFloatingMsg("Healed!","pink");}else showFloatingMsg("Full HP!","pink"); }
-                    // PC HIT = -1 Heart AND -10 Score
+                    // 🔥 UPDATED: PC HIT = -1 Heart AND -10 Score
                     else if(t=='computer') { 
                         playSound('sfx-hit'); 
                         health--; 
-                        score -= 10; 
+                        score -= 10; // New penalty
                         showFloatingMsg("💔 -10", "red"); 
                         scene.background = new THREE.Color(0xff0000); setTimeout(()=>scene.background=new THREE.Color(0xdceefb),100); 
                         if(health<=0) triggerGameOver(false); 
                     }
                     else if(t=='fish') { score-=15; playSound('sfx-hit'); showFloatingMsg("Slacking -15", "#00bfff"); }
-                    // ISO = +100 Score
+                    // 🔥 UPDATED: ISO = +100 Score
                     else if(t=='iso') { 
                         isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); 
                         if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("BONUS +100!", "gold");} 
