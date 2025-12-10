@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jiji's Adventure v49.0 (UI Restored)</title>
+    <title>Jiji's Adventure v50.0.1 (Released)</title>
     <style>
         * { -webkit-tap-highlight-color: transparent; }
         body { 
@@ -92,7 +92,7 @@
         <div id="home-subtitle">~ Work Hard, Play Hard ~</div>
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
-        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0 (Released)</div>
+        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0.1 (Released)</div>
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
         <button class="menu-btn" onclick="showRanking()">Ranking</button>
@@ -384,10 +384,10 @@ function createObs() {
         const sportClubData = {
             "January": { theme: "CNY Event", questions: [ { q: "What is the game we play?", correct: "Snake game", wrong: ["Squid game", "Snail game", "Jiji game"] }, { q: "What are the games we NOT playing in January CNY event?", correct: "Guess the word", wrong: ["Throw 'orange'", "Draw angpao", "Freeze & stop!"] } ] },
             "February": { theme: "Go-Kart 🏎️", questions: [ { q: "Where do we play go-kart this month?", correct: "Element Mall", wrong: ["Melaka go-kart", "Pahlawan", "Office"] }, { q: "Do we need to wear a safety helmet when playing?", correct: "No", wrong: ["Yes"] } ] },
-            "March": { theme: "Hot Spring ♨️", questions: [ { q: "Total how many people go to this event?", correct: "6", wrong: ["5", "7", "8"] }, { q: "In a hot spring, what is the most important thing to do?", correct: "Stay hydrated (Drink water)", wrong: ["Eat a heavy meal", "Swim laps quickly", "Wear a winter jacket"] } ] },
+            "March": { theme: "Hot Spring ♨️", questions: [ { q: "Total how many people go to this event?", correct: "6", wrong: ["5", "7", "8"] }, { q: "In a hot spring, what is the most important thing to do?", correct: "Dont stay long time", wrong: ["Eat a heavy meal", "Swim laps quickly", "Wear a winter jacket"] } ] },
             "April": { theme: "Movie Day with KL Team", questions: [ { q: "How many PEOPLE joined this event?", correct: "> 6", wrong: ["4", "5", "6"] }, { q: "What movie did the team watch?", correct: "Minecraft", wrong: ["Nezha2", "Thunderbolt*", "Superman"] } ] },
             "May": { theme: "Board Game", questions: [ { q: "What is the board game name we play?", correct: "Bug War", wrong: ["Jiji war", "Bug game", "Melaka War"] }, { q: "Who is the winner?", correct: "Chung Aik & KK", wrong: ["Chung Aik & PP", " KK & PP", "Qing Zhe"] } ] },
-            "June": { theme: "Taman Botanikal Melaka 🌿", questions: [ { q: "We go Taman Botanikal to?", correct: "walk", wrong: ["run", "cycling", "eat"] }, { q: "What animal did we not see on that day?", correct: "cat", wrong: ["monkey", "squirrel", "spider"] } ] },
+            "June": { theme: "Taman Botanikal Melaka 🌿", questions: [ { q: "We go Taman Botanikal to?", correct: "walk", wrong: ["run", "cycling", "eat"] }, { q: "What animal did we not see on that day?", correct: "Cat", wrong: ["Monkey", "Squirrel", "Spider"] } ] },
             "July": { theme: "Cinema Experience in Office 🎬", questions: [ { q: "What movie did the team watch?", correct: "KPOP Demon Hunter", wrong: ["Fantastic Four", "KPOP Demon Slayer", "Ne Zha 2"] }, { q: "What food did we not have on movie day?", correct: "Popcorn", wrong: ["Burger", "Potato Chips", "Sprite"]} ] },
             "August": { theme: "SNOWLIM WONDERLAND ❄️", questions: [ { q: "What happened on that day?", correct: "Ms Kan busy finding phone", wrong: ["Lim made QZ fall down", "Ainul drove us there", "Shu Ting & KK met CSH staff"] }, { q: "In a cold environment, what do we need to take care of?", correct: "Keep body warm", wrong: ["Drink iced coffee", "Wear short pants", "Apply sunblock only"] } ] },
             "September": { theme: "Mooncake & Halloween 🌕🎃", questions: [ { q: "Who is not in the spooky squad?", correct: "Aqilah", wrong: ["Shu Yee", "PP", "Julie"] }, { q: "In one of the Mooncake stories, which animal was not mentioned?", correct: "Chicken", wrong: ["Rabbit", "Fox", "Monkey"] } ] },
@@ -568,3 +568,4 @@ function createObs() {
     </script>
 </body>
 </html>
+
