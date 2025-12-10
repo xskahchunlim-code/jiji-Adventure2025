@@ -240,7 +240,7 @@
                         if(health<=0) triggerGameOver(false); 
                     }
                     else if(t=='fish') { score-=15; playSound('sfx-hit'); showFloatingMsg("Slacking -15", "#00bfff"); }
-                    else if(t=='iso') { isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("BONUS +100!", "gold");} }
+                    else if(t=='iso') { isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("ISO done! BONUS +100!", "gold");} }
                     else if(t=='quiz') { playSound('sfx-jump'); scene.remove(o); obstacles.splice(i,1); showRandomQuiz(); return; }
                     scene.remove(o); obstacles.splice(i,1); updateHUD(); continue;
                 }
@@ -312,7 +312,7 @@
         function createObs() {
             const rand = Math.random();
             let type = 'bug';
-            if(rand < 0.40) type='bug'; else if(rand < 0.75) type='computer'; else if(rand < 0.85) type='fish'; else if(rand < 0.95) type='iso'; else if(rand < 0.98) type='tea'; else type='quiz'; 
+            if(rand < 0.40) type='bug'; else if(rand < 0.75) type='computer'; else if(rand < 0.85) type='fish'; else if(rand < 0.95) type='iso'; else if(rand < 0.95) type='tea'; else type='quiz'; 
             let size = 1.8; if(type === 'bug') size = 3.0; if(type === 'computer') size = 2.0;
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(size,size), mats[type]);
             mesh.position.set(lanes[Math.floor(Math.random()*3)], size/2, -80); 
@@ -327,36 +327,36 @@
         }
 
         const randomQuestions = [
-            {q:"Priority reply to?", o:["Bestie","Family","Client","Boss"], a:[2,3]},
-            {q:"Least ordered food 2025?", o:["Mi bodoh","Mak cik","Anak jamil","MCD"], a:3},
-            {q:"Urgent client task outstation?", o:["0165438272","0193318272","0193388272","052889685"], a:1},
-            {q:"Priority task?", o:["bug","NR","Wishlist","troubleshoot"], a:[0,3]},
-            {q:"QA & Support meeting?", o:["Mon 9:30","Mon 10:00","Fri 10:00","Fri 9:30"], a:1},
-            {q:"Total interns?", o:["2","5","6","7"], a:3},
-            {q:"JIJI means?", o:["Work hard","Positive","Client","Chicken"], a:1},
-            {q:"Claim deadline?", o:["7 days","5th","Before PP","5th"], a:1},
-            {q:"Not our product?", o:["Ximobile","Xiclock","XiPos","Hup Soon MY"], a:2},
-            {q:"Position not exist?", o:["CEO","CP0","CCO","CC"], a:1},
-            {q:"Server down call?", o:["CEO","Dev","Infra","Cleaner"], a:2},
-            {q:"Found bug?", o:["QA","Dev","Infra","Log TT"], a:3},
-            {q:"Cute figure source?", o:["Ms Kan","Qing Zhe","Intern","Kah Chun"], a:3},
-            {q:"Promo sharer?", o:["CC","Chung Aik","Yen Fen","Kah Chun"], a:2},
-            {q:"Rubbish alert?", o:["JJ","Winson","PP","Ainul"], a:3},
-            {q:"Parcel queen?", o:["Aqirah","KK","Shu Ting","Dahlia"], a:1},
-            {q:"Office phrase?", o:["Hiking!","Tea?","Boss Belanja!","Makan apa?"], a:3},
-            {q:"Missing item?", o:["Find","Intern","Buy","PP"], a:3},
-            {q:"Scariest thing?", o:["Dog","Cockroach","Spider","Bug"], a:3},
-            {q:"Support asks?", o:["Coffee?","What?","Charge?","TeamViewer?"], a:3},
-            {q:"User says?", o:["Checked.","Expert.","My bad.","Dunno!"], a:3},
-            {q:"Support nightmare?", o:["Meeting","No tea","Tasks","Urgent no detail"], a:3},
-            {q:"Dev says to Bug?", o:["Thanks!","Good job!","Cook!","Cannot reproduce."], a:3},
-            {q:"Which ISO QA team will need to get this year?", o:["ISO 27001:2015", "ISO 9001:2026", "ISO 9001:2015", "ISO 14001:2020"], a:2},
-            {q:"Which is not include in support KPI this year?", o:["Service Transformation", "Digital Innovation", "E-Invoice", "MDXS2"], a:1},
-            {q:"Which is our support phone brand?", o:["IPHONE", "XIAOMI", "HUAWEI", "VIVO"], a:3},
-            {q:"If you going to take device from device room, you need to?", o:["Inform PP", "Leave a note", "Update device list", "Inform Kah Chun"], a:3},
-            {q:"Someone put some funny picture at our MLK TA station PC, who is not suspect?", o:["PP", "Julie", "Ainul", "Chung Aik"], a:3},
-            {q:"Which is not AI tools", o:["Gemini", "Chatgpt", "Grok", "Groot"], a:3},
-            {q:"Which is not programming language", o:["C-", "PHP", "HTML", "C++"], a:0}
+			{q:"If people below find you at same time, who will you reply first?", o:["Bestie","Family","Client","Your boss"], a:2},
+            {q:"Which is team least order to eat in 2025?", o:["Mi bodoh","Mak cik","Anak jamil","MCD"], a:3},
+            {q:"Urgent task from client but you outstation now, call:", o:["0165438272","0193318272","0193388272","052889685"], a:1},
+            {q:"Few tt on hand! which need to do first?", o:["Bug","NR","Wishlist","Trouble shoot"], a:[0,3]},
+            {q:"QA & support have meeting every?", o:["Monday 930am","Monday 1000am","Friday 1000am","Friday 930am"], a:1},
+            {q:"Total how many interns we have this year?", o:["2","5","6","7"], a:3},
+            {q:"What JIJI means?", o:["Work hard","Positive","Client","Chicken"], a:1},
+            {q:"You must do your claim before?", o:["Before 7days","Before 5th of month","Before PP submit","By 5th of month"], a:1},
+            {q:"Which is not our product?", o:["Ximobile","Xiclock","XiPos","Hup Soon MY"], a:2},
+            {q:"Which is not exist in XeerSoft?", o:["CEO","CP0","CCO","CC"], a:1},
+            {q:"Server down! What do we do now?", o:["Inform CEO","Inform developer","Inform Infra","Inform Cleaning Aunty"], a:2},
+            {q:"Found Bug! What do we do now?", o:["Inform QA","Inform developer","Inform Infra","Log tt to get help"], a:3},
+            {q:"Found new cute figure in office! Mostly is from?", o:["Ms Kan","Qing Zhe","Intern","Kah Chun"], a:3},
+            {q:"Who is the one always share promo and news to office?", o:["CC","Chung Aik","Yen Fen","Kah Chun"], a:2},
+            {q:"Who is the one always alert team to throw rubbish?", o:["JJ","Winson","pp","Ainul"], a:3},
+            {q:"Who is the one always have parcel incoming?", o:["Aqirah","KK","Shu Ting","Dahlia"], a:1},
+            {q:"What is the most common phrase heard in office?", o:["Let’s go hiking!","Tea time?","Boss Belanja!","Nanti makan apa?"], a:3},
+            {q:"Cannot find some item in the office, what do we do?", o:["Find it until get it","Get interns help","Direct buy new","Find PP to help"], a:3},
+            {q:"Which is the scariest in IT office?", o:["Dog","Cockroach","Spider","Bug"], a:3},
+            {q:"What is the most common question Support asks the user?", o:["You want coffee?","What you want?","Need to charge","Can you send TeamViewer?"], a:3},
+            {q:"What users always say when reporting an issue?", o:["Double checked.","I’m expert.","It’s my mistake.","I don't know!"], a:3},
+            {q:"What is Support’s biggest nightmare?", o:["Long meeting","No bubble tea","Many task","Urgent issue w/ no detail"], a:3},
+            {q:"When QA report a bug, what developers usually say?", o:["Thank you QA!","Good job!","Let us cook!","Cannot reproduce."], a:3},
+			{q:"Which ISO QA team will need to get this year?", o:["ISO 27001:2015", "ISO 9001:2026", "ISO 9001:2015", "ISO 14001:2020"], a:2},
+			{q:"Which is not include in support KPI this year?", o:["Service Transformation", "Digital Innovation", "E-Invoice", "MDXS2"], a:1},
+			{q:"Which is our support phone brand?", o:["IPHONE", "XIAOMI", "HUAWEI", "VIVO"], a:3},
+			{q:"If you going to take device from device room, you need to?", o:["Inform PP", "Leave a note", "Update device list", "Inform Kah Chun"], a:3},
+			{q:"Someone put some funny picture at our MLK TA station PC, who is not suspect?", o:["PP", "Julie", "Ainul", "Chung Aik"], a:3},
+			{q:"Which is not AI tools", o:["Gemini", "Chatgpt", "Grok", "Groot"], a:3},
+			{q:"Which is not programming language", o:["C-", "PHP", "HTML", "C++"], a:0}		
         ];
         let availableQIndices = [...Array(randomQuestions.length).keys()];
 
@@ -476,8 +476,8 @@
                 b.onclick=()=>{ 
                     document.getElementById('quiz-modal').style.display='none'; 
                     let isCorrect = Array.isArray(q.a) ? q.a.includes(i) : q.a === i;
-                    if(isCorrect) { score+=50; playSound('sfx-coin'); showFloatingMsg("+50", "green"); } 
-                    else { score-=50; playSound('sfx-hit'); showFloatingMsg("-50", "red"); } 
+                    if(isCorrect) { score+=50; playSound('sfx-coin'); showFloatingMsg("Yes! +50", "green"); } 
+                    else { score-=50; playSound('sfx-hit'); showFloatingMsg("Wrong! -50", "red"); } 
                     updateHUD(); setTimeout(() => startCountdown(), 500);
                 };
                 div.appendChild(b);
@@ -508,8 +508,8 @@
                 const b = document.createElement('button'); b.className = 'quiz-btn'; b.innerText = opt.text;
                 b.onclick = () => {
                     document.getElementById('quiz-modal').style.display='none'; 
-                    if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("+25", "#00b894"); }
-                    else { playSound('sfx-hit'); showFloatingMsg("+0", "gray"); }
+                    if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("ESG Increase! +25", "#00b894"); }
+                    else { playSound('sfx-hit'); showFloatingMsg("Join more activity..+0", "red"); }
                     updateHUD(); currentMonth++; monthTimer = 0;
                     if (currentMonth > 12) triggerGameOver(true); else setTimeout(() => startCountdown(), 500);
                 };
