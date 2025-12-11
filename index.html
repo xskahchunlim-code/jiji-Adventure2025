@@ -218,7 +218,7 @@
             updateHUD();
             
             frame++; 
-            if(frame % 300 === 0 && gameSpeed < 0.60) gameSpeed += 0.01; 
+            if(frame % 400 === 0 && gameSpeed < 0.50) gameSpeed += 0.01; 
             let spawnRate = Math.floor(25 / gameSpeed); if(frame % spawnRate == 0) createObs();
 
             if(jijiMesh) {
@@ -568,3 +568,4 @@ function createObs() {
     </script>
 </body>
 </html>
+
