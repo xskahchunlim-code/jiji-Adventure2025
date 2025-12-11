@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jiji's Adventure v50.0.1 (Released)</title>
+    <title>Jiji's Adventure v50.0 (Speed Fix)</title>
     <style>
         * { -webkit-tap-highlight-color: transparent; }
         body { 
@@ -44,7 +44,6 @@
         @keyframes sway { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
         @keyframes runAcross { 0% { left: -150px; } 100% { left: 110%; } }
         
-        /* 🔥 封面飘浮图标样式 */
         .floating-icon { position: absolute; opacity: 0.3; z-index: 101; animation: floatAnim infinite linear; pointer-events: none; }
         @keyframes floatAnim { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(10deg); } 100% { transform: translateY(0) rotate(0deg); } }
 
@@ -59,7 +58,7 @@
         .close-btn { background: #aaa; color: white; border: none; padding: 10px 30px; border-radius: 50px; cursor: pointer; margin-top: 20px; font-size: 18px; }
         .close-btn:hover { background: #888; }
 
-        /* === Ranking Styles (UI Fix) === */
+        /* === Ranking Styles === */
         .ranking-layout { display: flex; gap: 20px; align-items: flex-start; min-height: 300px; }
         .ranking-left { flex: 2; text-align: left; max-height: 300px; overflow-y: auto; }
         .ranking-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 2px solid #eee; padding-left: 20px; min-width: 150px; }
@@ -92,7 +91,7 @@
         <div id="home-subtitle">~ Work Hard, Play Hard ~</div>
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
-        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0.1 (Released)</div>
+        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0 (Speed Fix)</div>
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
         <button class="menu-btn" onclick="showRanking()">Ranking</button>
@@ -189,7 +188,18 @@
 
         let scene, camera, renderer;
         let gameState='HOME', score=0, health=3, isoCount=0, frame=0, lane=1, jijiMesh;
-        let gameSpeed = 0.30; let isPaused = false; 
+        
+        // 🔥 SPEED ADJUSTMENT HERE (初始速度)
+        // 0.3 = 原版速度 (Normal)
+        // 0.4 = 稍微快一点 (Fast)
+        let gameSpeed = 0.35; 
+        
+        // 🔥 FRAME RATE LOCK (锁帧)
+        const FPS = 60;
+        const interval = 1000 / FPS;
+        let then = Date.now();
+        let isPaused = false; 
+        
         const CLOCK = new THREE.Clock(); const SECONDS_PER_MONTH = 15; 
         let currentMonth = 1; let monthTimer = 0; let animFrame = 0; 
         const obstacles=[], lanes=[-2.5,0,2.5];
@@ -207,18 +217,28 @@
             el.play().catch(e => console.log("Sound error:", e));
         }
 
-        // --- CORE ANIMATION LOOP ---
+        // --- CORE ANIMATION LOOP (With FPS Lock) ---
         function animate() {
-            if(gameState === 'COUNTDOWN') { if(jijiMesh) jijiMesh.position.y = 1.6 + Math.sin(Date.now() * 0.003) * 0.05; renderer.render(scene, camera); requestAnimationFrame(animate); return; }
-            if(gameState === 'HOME') { renderer.render(scene, camera); requestAnimationFrame(animate); return; }
+            requestAnimationFrame(animate);
+
+            // FPS Lock Logic
+            const now = Date.now();
+            const delta = now - then;
+            if (delta < interval) return; // 如果太快了，就跳过这一帧
+            then = now - (delta % interval);
+
+            if(gameState === 'COUNTDOWN') { if(jijiMesh) jijiMesh.position.y = 1.6 + Math.sin(Date.now() * 0.003) * 0.05; renderer.render(scene, camera); return; }
+            if(gameState === 'HOME') { renderer.render(scene, camera); return; }
             if(gameState !== 'PLAYING') return;
 
-            const delta = CLOCK.getDelta(); monthTimer += delta;
+            const dt = CLOCK.getDelta(); monthTimer += dt;
             if(monthTimer >= SECONDS_PER_MONTH) { showSportClub(); return; }
             updateHUD();
             
             frame++; 
-            if(frame % 600 === 0 && gameSpeed < 0.48) gameSpeed += 0.01; 
+            // 🔥 Acceleration (加速度)
+            if(frame % 500 === 0 && gameSpeed < 0.60) gameSpeed += 0.01; 
+            
             let spawnRate = Math.floor(25 / gameSpeed); if(frame % spawnRate == 0) createObs();
 
             if(jijiMesh) {
@@ -240,14 +260,14 @@
                         if(health<=0) triggerGameOver(false); 
                     }
                     else if(t=='fish') { score-=15; playSound('sfx-hit'); showFloatingMsg("Slacking -15", "#00bfff"); }
-                    else if(t=='iso') { isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("ISO done! BONUS +100!", "gold");} }
+                    else if(t=='iso') { isoCount++; playSound('sfx-coin'); showFloatingMsg(`${isoCount}/5`, "cyan"); if(isoCount>=5){score+=100; isoCount=0; showFloatingMsg("BONUS +100!", "gold");} }
                     else if(t=='quiz') { playSound('sfx-jump'); scene.remove(o); obstacles.splice(i,1); showRandomQuiz(); return; }
                     scene.remove(o); obstacles.splice(i,1); updateHUD(); continue;
                 }
                 if(o.position.z>5) { scene.remove(o); obstacles.splice(i,1); }
             }
             grid.position.z += gameSpeed; if(grid.position.z>0) grid.position.z=-50;
-            renderer.render(scene, camera); requestAnimationFrame(animate);
+            renderer.render(scene, camera);
         }
 
         window.startGameLogic = () => { try { if(!scene) initThreeJS(); initGame(); playSound('bgm'); } catch (e) { alert("Error: " + e.message); console.error(e); } };
@@ -256,7 +276,8 @@
             scene=new THREE.Scene(); scene.background=new THREE.Color(0xdceefb); scene.fog=new THREE.Fog(0xdceefb,10,60);
             camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000); 
             renderer=new THREE.WebGLRenderer({antialias:true}); 
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            // 🔥 Performance Fix: Limit pixel ratio to 1.5 to help slow PCs
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
             renderer.setSize(window.innerWidth,window.innerHeight);
             document.getElementById('canvas-container').appendChild(renderer.domElement);
             scene.add(new THREE.AmbientLight(0xffffff,0.7)); 
@@ -270,9 +291,16 @@
             document.getElementById('home-screen').style.display='none';
             document.getElementById('ui-layer').style.display='flex';
             document.getElementById('game-over-modal').style.display='none';
-            score=0; health=3; isoCount=0; gameSpeed = 0.30; 
+            
+            // 🔥 Reset Game Speed here too
+            score=0; health=3; isoCount=0; gameSpeed = 0.35; 
+            
             currentMonth = 1; monthTimer = 0;
             availableQIndices = [...Array(randomQuestions.length).keys()];
+            
+            // Reset FPS timer
+            then = Date.now();
+            
             CLOCK.start();
             obstacles.forEach(o=>scene.remove(o)); obstacles.length=0;
             updateHUD();
@@ -308,29 +336,17 @@
             document.getElementById('ui-hearts').innerText = "❤️".repeat(health) + "🖤".repeat(3-health);
             document.getElementById('ui-iso').innerText = `ISO: ${isoCount}/5`;
         }
-		
-		
-function createObs() {
+
+        // 🔥 FIXED PROBABILITY
+        function createObs() {
             const rand = Math.random();
             let type = 'bug';
-            
-            // 0% - 40% : Bug (40% 概率)
-            if(rand < 0.40) type='bug'; 
-            
-            // 40% - 75% : 电脑 (35% 概率)
-            else if(rand < 0.75) type='computer'; 
-            
-            // 75% - 85% : 咸鱼 (10% 概率)
-            else if(rand < 0.85) type='fish';  
-            
-            // 85% - 90% : ISO (5% 概率)
-            else if(rand < 0.90) type='iso'; 
-            
-            // 90% - 95% : 奶茶 (5% 概率) -> 🔥 这里改好了，和 ISO 一样概率
-            else if(rand < 0.95) type='tea'; 
-            
-            // 95% - 100% : 问号 (5% 概率)
-            else type='quiz'; 
+            if(rand < 0.40) type='bug';          // 40%
+            else if(rand < 0.75) type='computer'; // 35%
+            else if(rand < 0.85) type='fish';     // 10%
+            else if(rand < 0.90) type='iso';      // 5%
+            else if(rand < 0.95) type='tea';      // 5% (Fix: Now equal to ISO)
+            else type='quiz';                     // 5%
             
             let size = 1.8; if(type === 'bug') size = 3.0; if(type === 'computer') size = 2.0;
             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(size,size), mats[type]);
@@ -338,8 +354,6 @@ function createObs() {
             mesh.userData={type}; 
             scene.add(mesh); obstacles.push(mesh);
         }
-		
-		
 
         function showFloatingMsg(text, color) {
             const msg = document.getElementById('center-msg'); msg.innerText = text; msg.style.color = color;
@@ -347,47 +361,34 @@ function createObs() {
             setTimeout(() => { if(gameState=='PLAYING') msg.style.display = 'none'; }, 1000);
         }
 
+        // 🔥 CUSTOM QUESTIONS (Added User's list)
         const randomQuestions = [
-			{q:"If people below find you at same time, who will you reply first?", o:["Bestie","Family","Client","Your boss"], a:2},
-            {q:"Which is team least order to eat in 2025?", o:["Mi bodoh","Mak cik","Anak jamil","MCD"], a:3},
-            {q:"Urgent task from client but you outstation now, call:", o:["0165438272","0193318272","0193388272","052889685"], a:1},
-            {q:"Few tt on hand! which need to do first?", o:["Bug","NR","Wishlist","Trouble shoot"], a:[0,3]},
-            {q:"QA & support have meeting every?", o:["Monday 930am","Monday 1000am","Friday 1000am","Friday 930am"], a:1},
-            {q:"Total how many interns we have this year?", o:["2","5","6","7"], a:3},
-            {q:"What JIJI means?", o:["Work hard","Positive","Client","Chicken"], a:1},
-            {q:"You must do your claim before?", o:["Before 7days","Before 5th of month","Before PP submit","By 5th of month"], a:1},
-            {q:"Which is not our product?", o:["Ximobile","Xiclock","XiPos","Hup Soon MY"], a:2},
-            {q:"Which is not exist in XeerSoft?", o:["CEO","CP0","CCO","CC"], a:1},
-            {q:"Server down! What do we do now?", o:["Inform CEO","Inform developer","Inform Infra","Inform Cleaning Aunty"], a:2},
-            {q:"Found Bug! What do we do now?", o:["Inform QA","Inform developer","Inform Infra","Log tt to get help"], a:3},
-            {q:"Found new cute figure in office! Mostly is from?", o:["Ms Kan","Qing Zhe","Intern","Kah Chun"], a:3},
-            {q:"Who is the one always share promo and news to office?", o:["CC","Chung Aik","Yen Fen","Kah Chun"], a:2},
-            {q:"Who is the one always alert team to throw rubbish?", o:["JJ","Winson","pp","Ainul"], a:3},
-            {q:"Who is the one always have parcel incoming?", o:["Aqirah","KK","Shu Ting","Dahlia"], a:1},
-            {q:"What is the most common phrase heard in office?", o:["Let’s go hiking!","Tea time?","Boss Belanja!","Nanti makan apa?"], a:3},
-            {q:"Cannot find some item in the office, what do we do?", o:["Find it until get it","Get interns help","Direct buy new","Find PP to help"], a:3},
-            {q:"Which is the scariest in IT office?", o:["Dog","Cockroach","Spider","Bug"], a:3},
-            {q:"What is the most common question Support asks the user?", o:["You want coffee?","What you want?","Need to charge","Can you send TeamViewer?"], a:3},
-            {q:"What users always say when reporting an issue?", o:["Double checked.","I’m expert.","It’s my mistake.","I don't know!"], a:3},
-            {q:"What is Support’s biggest nightmare?", o:["Long meeting","No bubble tea","Many task","Urgent issue w/ no detail"], a:3},
-            {q:"When QA report a bug, what developers usually say?", o:["Thank you QA!","Good job!","Let us cook!","Cannot reproduce."], a:3},
-			{q:"Which ISO QA team will need to get this year?", o:["ISO 27001:2015", "ISO 9001:2026", "ISO 9001:2015", "ISO 14001:2020"], a:2},
-			{q:"Which is not include in support KPI this year?", o:["Service Transformation", "Digital Innovation", "E-Invoice", "MDXS2"], a:1},
-			{q:"Which is our support phone brand?", o:["IPHONE", "XIAOMI", "HUAWEI", "VIVO"], a:3},
-			{q:"If you going to take device from device room, you need to?", o:["Inform PP", "Leave a note", "Update device list", "Inform Kah Chun"], a:3},
-			{q:"Someone put some funny picture at our MLK TA station PC, who is not suspect?", o:["PP", "Julie", "Ainul", "Chung Aik"], a:3},
-			{q:"Which is not AI tools", o:["Gemini", "Chatgpt", "Grok", "Groot"], a:3},
-			{q:"Which is not programming language", o:["C-", "PHP", "HTML", "C++"], a:0}		
+            {q:"Priority reply to?", o:["Bestie","Family","Client","Boss"], a:[2,3]},
+            {q:"Least ordered food 2025?", o:["Mi bodoh","Mak cik","Anak jamil","MCD"], a:3},
+            {q:"Urgent client task outstation?", o:["0165438272","0193318272","0193388272","052889685"], a:1},
+            {q:"Priority task?", o:["bug","NR","Wishlist","troubleshoot"], a:[0,3]},
+            {q:"QA & Support meeting?", o:["Mon 9:30","Mon 10:00","Fri 10:00","Fri 9:30"], a:1},
+            {q:"Total interns?", o:["2","5","6","7"], a:3},
+            {q:"JIJI means?", o:["Work hard","Positive","Client","Chicken"], a:1},
+            {q:"Claim deadline?", o:["7 days","5th","Before PP","5th"], a:1},
+            {q:"Which ISO QA team will need to get this year?", o:["ISO 27001:2015", "ISO 9001:2026", "ISO 9001:2015", "ISO 14001:2020"], a:2},
+            {q:"Which is not include in support KPI this year?", o:["Service Transformation", "Digital Innovation", "E-Invoice", "MDXS2"], a:1},
+            {q:"Which is our support phone brand?", o:["IPHONE", "XIAOMI", "HUAWEI", "VIVO"], a:3},
+            {q:"If you going to take device from device room, you need to?", o:["Inform PP", "Leave a note", "Update device list", "Inform Kah Chun"], a:3},
+            {q:"Someone put some funny picture at our MLK TA station PC, who is not suspect?", o:["PP", "Julie", "Ainul", "Chung Aik"], a:3},
+            {q:"Which is not AI tools", o:["Gemini", "Chatgpt", "Grok", "Groot"], a:3},
+            {q:"Which is not programming language", o:["C-", "PHP", "HTML", "C++"], a:0},
+            {q:"When QA report a bug, what developers usually say?", o:["Thank you QA!","Good job!","Let us cook!","Cannot reproduce."], a:3}
         ];
         let availableQIndices = [...Array(randomQuestions.length).keys()];
 
         const sportClubData = {
             "January": { theme: "CNY Event", questions: [ { q: "What is the game we play?", correct: "Snake game", wrong: ["Squid game", "Snail game", "Jiji game"] }, { q: "What are the games we NOT playing in January CNY event?", correct: "Guess the word", wrong: ["Throw 'orange'", "Draw angpao", "Freeze & stop!"] } ] },
             "February": { theme: "Go-Kart 🏎️", questions: [ { q: "Where do we play go-kart this month?", correct: "Element Mall", wrong: ["Melaka go-kart", "Pahlawan", "Office"] }, { q: "Do we need to wear a safety helmet when playing?", correct: "No", wrong: ["Yes"] } ] },
-            "March": { theme: "Hot Spring ♨️", questions: [ { q: "Total how many people go to this event?", correct: "6", wrong: ["5", "7", "8"] }, { q: "In a hot spring, what is the most important thing to do?", correct: "Dont stay long time", wrong: ["Eat a heavy meal", "Swim laps quickly", "Wear a winter jacket"] } ] },
+            "March": { theme: "Hot Spring ♨️", questions: [ { q: "Total how many people go to this event?", correct: "6", wrong: ["5", "7", "8"] }, { q: "In a hot spring, what is the most important thing to do?", correct: "Stay hydrated (Drink water)", wrong: ["Eat a heavy meal", "Swim laps quickly", "Wear a winter jacket"] } ] },
             "April": { theme: "Movie Day with KL Team", questions: [ { q: "How many PEOPLE joined this event?", correct: "> 6", wrong: ["4", "5", "6"] }, { q: "What movie did the team watch?", correct: "Minecraft", wrong: ["Nezha2", "Thunderbolt*", "Superman"] } ] },
             "May": { theme: "Board Game", questions: [ { q: "What is the board game name we play?", correct: "Bug War", wrong: ["Jiji war", "Bug game", "Melaka War"] }, { q: "Who is the winner?", correct: "Chung Aik & KK", wrong: ["Chung Aik & PP", " KK & PP", "Qing Zhe"] } ] },
-            "June": { theme: "Taman Botanikal Melaka 🌿", questions: [ { q: "We go Taman Botanikal to?", correct: "walk", wrong: ["run", "cycling", "eat"] }, { q: "What animal did we not see on that day?", correct: "Cat", wrong: ["Monkey", "Squirrel", "Spider"] } ] },
+            "June": { theme: "Taman Botanikal Melaka 🌿", questions: [ { q: "We go Taman Botanikal to?", correct: "walk", wrong: ["run", "cycling", "eat"] }, { q: "What animal did we not see on that day?", correct: "cat", wrong: ["monkey", "squirrel", "spider"] } ] },
             "July": { theme: "Cinema Experience in Office 🎬", questions: [ { q: "What movie did the team watch?", correct: "KPOP Demon Hunter", wrong: ["Fantastic Four", "KPOP Demon Slayer", "Ne Zha 2"] }, { q: "What food did we not have on movie day?", correct: "Popcorn", wrong: ["Burger", "Potato Chips", "Sprite"]} ] },
             "August": { theme: "SNOWLIM WONDERLAND ❄️", questions: [ { q: "What happened on that day?", correct: "Ms Kan busy finding phone", wrong: ["Lim made QZ fall down", "Ainul drove us there", "Shu Ting & KK met CSH staff"] }, { q: "In a cold environment, what do we need to take care of?", correct: "Keep body warm", wrong: ["Drink iced coffee", "Wear short pants", "Apply sunblock only"] } ] },
             "September": { theme: "Mooncake & Halloween 🌕🎃", questions: [ { q: "Who is not in the spooky squad?", correct: "Aqilah", wrong: ["Shu Yee", "PP", "Julie"] }, { q: "In one of the Mooncake stories, which animal was not mentioned?", correct: "Chicken", wrong: ["Rabbit", "Fox", "Monkey"] } ] },
@@ -407,7 +408,6 @@ function createObs() {
         };
 
         let rankAnimTimer = null;
-        // 🔥 3. 修复排行榜显示逻辑 (配合 CSS)
         window.showRanking = async () => {
             document.getElementById('ranking-modal').style.display = 'flex';
             let f = 1; const img = document.getElementById('rank-anim-jiji');
@@ -444,7 +444,7 @@ function createObs() {
         function triggerGameOver(success = false) {
             gameState='GAMEOVER'; playSound(success?'sfx-win':'sfx-hit');
             document.getElementById('game-over-modal').style.display = 'flex';
-            document.getElementById('go-title').innerText = success ? "🎉 Congrats on surviving 2025🎉" : "Evaluation Finished, Keep improve";
+            document.getElementById('go-title').innerText = success ? "🎉 Perfect Attendance 🎉" : "Evaluation Finished";
             document.getElementById('go-score').innerText = score;
             let imgName = 'jiji_working';
             if (score < 0) imgName = 'jiji_unbelieve'; else if (score < 250) imgName = 'jiji_cry'; else if (score <= 500) imgName = 'jiji_working'; else if (score <= 1000) imgName = 'jiji_happy'; else if (score <= 1500) imgName = 'jiji_celebrate'; else imgName = 'jiji_is_god';
@@ -465,7 +465,6 @@ function createObs() {
         function adjustCamera() { if(!camera) return; camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); if(camera.aspect < 1) { camera.position.set(0, 7, 14); } else { camera.position.set(0, 5, 8); } camera.lookAt(0, 0, -5); }
         window.addEventListener('resize', adjustCamera);
 
-        initThreeJS();
         window.showTutorial = () => {
             playSound('sfx-jump'); 
             const list = document.getElementById('tutorial-content');
@@ -497,8 +496,8 @@ function createObs() {
                 b.onclick=()=>{ 
                     document.getElementById('quiz-modal').style.display='none'; 
                     let isCorrect = Array.isArray(q.a) ? q.a.includes(i) : q.a === i;
-                    if(isCorrect) { score+=50; playSound('sfx-coin'); showFloatingMsg("Yes! +50", "green"); } 
-                    else { score-=50; playSound('sfx-hit'); showFloatingMsg("Wrong! -50", "red"); } 
+                    if(isCorrect) { score+=50; playSound('sfx-coin'); showFloatingMsg("+50", "green"); } 
+                    else { score-=50; playSound('sfx-hit'); showFloatingMsg("-50", "red"); } 
                     updateHUD(); setTimeout(() => startCountdown(), 500);
                 };
                 div.appendChild(b);
@@ -529,8 +528,8 @@ function createObs() {
                 const b = document.createElement('button'); b.className = 'quiz-btn'; b.innerText = opt.text;
                 b.onclick = () => {
                     document.getElementById('quiz-modal').style.display='none'; 
-                    if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("ESG Increase! +25", "#00b894"); }
-                    else { playSound('sfx-hit'); showFloatingMsg("Join more activity", "red"); }
+                    if (opt.isCorrect) { score += 25; playSound('sfx-coin'); showFloatingMsg("+25", "#00b894"); }
+                    else { playSound('sfx-hit'); showFloatingMsg("+0", "gray"); }
                     updateHUD(); currentMonth++; monthTimer = 0;
                     if (currentMonth > 12) triggerGameOver(true); else setTimeout(() => startCountdown(), 500);
                 };
@@ -538,13 +537,6 @@ function createObs() {
             });
         }
         
-        window.togglePause = (forcePause = false) => {
-            if (gameState !== 'PLAYING' && gameState !== 'PAUSED') return;
-            if (forcePause) { isPaused = true; gameState = 'PAUSED'; document.getElementById('pause-overlay').style.display = 'flex'; CLOCK.stop(); } 
-            else { isPaused = !isPaused; if (isPaused) { gameState = 'PAUSED'; document.getElementById('pause-overlay').style.display = 'flex'; CLOCK.stop(); } else { gameState = 'PLAYING'; document.getElementById('pause-overlay').style.display = 'none'; CLOCK.start(); animate(); } }
-        };
-
-        // 🔥 4. 修复封面图标飘浮动画
         window.decorateHomePage = () => {
             const container = document.getElementById('home-screen');
             const icons = ['tea', 'bug', 'computer', 'fish', 'iso'];
@@ -568,4 +560,3 @@ function createObs() {
     </script>
 </body>
 </html>
-
