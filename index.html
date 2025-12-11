@@ -92,7 +92,7 @@
         <div id="home-subtitle">~ Work Hard, Play Hard ~</div>
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
-        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0.1 (Released)</div>
+        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0.2 (Released)</div>
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
         <button class="menu-btn" onclick="showRanking()">Ranking</button>
@@ -218,7 +218,7 @@
             updateHUD();
             
             frame++; 
-            if(frame % 600 === 0 && gameSpeed < 0.48) gameSpeed += 0.01; 
+            if(frame % 300 === 0 && gameSpeed < 0.80) gameSpeed += 0.01; 
             let spawnRate = Math.floor(25 / gameSpeed); if(frame % spawnRate == 0) createObs();
 
             if(jijiMesh) {
