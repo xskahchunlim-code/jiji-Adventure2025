@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jiji's Adventure v50.0 (Speed Fix)</title>
+    <title>Jiji's Adventure v51.0 (High Speed)</title>
     <style>
         * { -webkit-tap-highlight-color: transparent; }
         body { 
@@ -91,7 +91,7 @@
         <div id="home-subtitle">~ Work Hard, Play Hard ~</div>
         <img id="home-idle-jiji" src="jiji.png" alt="Jiji Idle" onerror="this.style.display='none'">
         <img id="home-run-jiji" src="jiji_run_1.png" alt="Jiji Run" onerror="this.style.display='none'">
-        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v50.0 (Speed Fix)</div>
+        <div style="position:absolute;bottom:10px;left:15px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:bold;pointer-events:none;">v51.0 (High Speed)</div>
         <button class="menu-btn" onclick="startGameLogic()">Start Working!</button>
         <button class="menu-btn" onclick="showTutorial()">How to Play?</button>
         <button class="menu-btn" onclick="showRanking()">Ranking</button>
@@ -189,10 +189,9 @@
         let scene, camera, renderer;
         let gameState='HOME', score=0, health=3, isoCount=0, frame=0, lane=1, jijiMesh;
         
-        // 🔥 SPEED ADJUSTMENT HERE (初始速度)
-        // 0.3 = 原版速度 (Normal)
-        // 0.4 = 稍微快一点 (Fast)
-        let gameSpeed = 0.35; 
+        // 🔥 SPEED ADJUSTMENT (初始速度提速！)
+        // 0.35 -> 0.48 (起步就很快)
+        let gameSpeed = 0.48; 
         
         // 🔥 FRAME RATE LOCK (锁帧)
         const FPS = 60;
@@ -224,7 +223,7 @@
             // FPS Lock Logic
             const now = Date.now();
             const delta = now - then;
-            if (delta < interval) return; // 如果太快了，就跳过这一帧
+            if (delta < interval) return; 
             then = now - (delta % interval);
 
             if(gameState === 'COUNTDOWN') { if(jijiMesh) jijiMesh.position.y = 1.6 + Math.sin(Date.now() * 0.003) * 0.05; renderer.render(scene, camera); return; }
@@ -236,8 +235,9 @@
             updateHUD();
             
             frame++; 
-            // 🔥 Acceleration (加速度)
-            if(frame % 500 === 0 && gameSpeed < 0.60) gameSpeed += 0.01; 
+            // 🔥 Acceleration (疯狂加速)
+            // 每 200 帧加速一次 (之前是 500)，最高速 0.85 (之前是 0.60)
+            if(frame % 200 === 0 && gameSpeed < 0.85) gameSpeed += 0.01; 
             
             let spawnRate = Math.floor(25 / gameSpeed); if(frame % spawnRate == 0) createObs();
 
@@ -276,7 +276,7 @@
             scene=new THREE.Scene(); scene.background=new THREE.Color(0xdceefb); scene.fog=new THREE.Fog(0xdceefb,10,60);
             camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000); 
             renderer=new THREE.WebGLRenderer({antialias:true}); 
-            // 🔥 Performance Fix: Limit pixel ratio to 1.5 to help slow PCs
+            // Performance Fix: Limit pixel ratio
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
             renderer.setSize(window.innerWidth,window.innerHeight);
             document.getElementById('canvas-container').appendChild(renderer.domElement);
@@ -293,12 +293,11 @@
             document.getElementById('game-over-modal').style.display='none';
             
             // 🔥 Reset Game Speed here too
-            score=0; health=3; isoCount=0; gameSpeed = 0.35; 
+            score=0; health=3; isoCount=0; gameSpeed = 0.48; 
             
             currentMonth = 1; monthTimer = 0;
             availableQIndices = [...Array(randomQuestions.length).keys()];
             
-            // Reset FPS timer
             then = Date.now();
             
             CLOCK.start();
@@ -337,7 +336,7 @@
             document.getElementById('ui-iso').innerText = `ISO: ${isoCount}/5`;
         }
 
-        // 🔥 FIXED PROBABILITY
+        // Probability (Tea & ISO = 5% Equal)
         function createObs() {
             const rand = Math.random();
             let type = 'bug';
@@ -345,7 +344,7 @@
             else if(rand < 0.75) type='computer'; // 35%
             else if(rand < 0.85) type='fish';     // 10%
             else if(rand < 0.90) type='iso';      // 5%
-            else if(rand < 0.95) type='tea';      // 5% (Fix: Now equal to ISO)
+            else if(rand < 0.95) type='tea';      // 5%
             else type='quiz';                     // 5%
             
             let size = 1.8; if(type === 'bug') size = 3.0; if(type === 'computer') size = 2.0;
@@ -361,7 +360,7 @@
             setTimeout(() => { if(gameState=='PLAYING') msg.style.display = 'none'; }, 1000);
         }
 
-        // 🔥 CUSTOM QUESTIONS (Added User's list)
+        // User Custom Questions
         const randomQuestions = [
             {q:"Priority reply to?", o:["Bestie","Family","Client","Boss"], a:[2,3]},
             {q:"Least ordered food 2025?", o:["Mi bodoh","Mak cik","Anak jamil","MCD"], a:3},
